@@ -258,8 +258,19 @@ namespace VisualValley
             menuStrip1.ForeColor = Color.Black;
         }
 
-        private void sintactico() { 
-        
+        private void sintactico() {
+            int tokens = dataGridView1.Rows.Count-1;
+            int posicion = 0;
+            while (tokens > 0) {
+                MessageBox.Show(""+dataGridView1.Rows[posicion].Cells[0].Value);
+                posicion += 1;
+                tokens -= 1;
+            }
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            sintactico();
         }
     }
 }

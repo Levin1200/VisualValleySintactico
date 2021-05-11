@@ -91,25 +91,25 @@ namespace VisualValley
             switch (tipotoken)
             {
             case Tipo.N_ENTERO:
-                    return "Numero entero";
+                    return "<nentero>";
             case Tipo.N_REAL:
-                    return "Numero real";
+                    return "<decimal>";
             case Tipo.P_DER:
-                    return "Parentesis de cierre";
+                    return "<parectesisc>";
             case Tipo.P_IZQ:
-                    return "Numero de apertura";
+                    return "<parentesisa>";
             case Tipo.S_DIV:
-                    return "Signo de division";
+                    return "<operador>";
             case Tipo.S_MAS:
-                    return "Signo de suma";
+                    return "<operador>";
             case Tipo.S_MENOS:
-                    return "Signo menos";
+                    return "operador";
             case Tipo.S_POR:
-                    return "Signo multiplicador";
+                    return "operador";
             case Tipo.S_POW:
-                    return "Signo potencia";
+                    return "potencia";
             case Tipo.V_ENT:
-                    return "Variable entero";
+                    return "ventero";
             case Tipo.PALABRA:
                     return "Palabra";
 

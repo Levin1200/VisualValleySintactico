@@ -98,7 +98,7 @@ namespace VisualValley
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            modoOscuroToolStripMenuItem_Click(sender,e);
         }
 
 

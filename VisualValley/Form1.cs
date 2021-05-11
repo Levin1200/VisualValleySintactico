@@ -251,5 +251,9 @@ namespace VisualValley
             menuStrip1.BackColor = Color.White;
             menuStrip1.ForeColor = Color.Black;
         }
+
+        private void sintactico() { 
+        
+        }
     }
 }

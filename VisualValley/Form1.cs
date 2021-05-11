@@ -269,13 +269,13 @@ namespace VisualValley
             string path = @"code.txt";
             if (!File.Exists(path))
             {
-                File.Delete(@"code.txt");
+               
                 // Si no existe crea el archivo
+                MessageBox.Show("Antes del error");
                 using (StreamWriter sw = File.CreateText(path))
                 {
                     //Guardo la primera posicion de mi lectura
                     fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
-                    MessageBox.Show(""+fila);
                     //Guardo tambien la nueva fila con el mismo valor
                     nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
                     while (tokens > 0)
@@ -284,18 +284,18 @@ namespace VisualValley
                         token = "" + dataGridView1.Rows[posicion].Cells[0].Value;
 
                         //Verifico si la fila actual es igual a la nueva fila
-                            if (fila == nuevafila)
-                            {
+                        if (fila == nuevafila)
+                        {
                             //Si son las mismas guardo la cadena mas el token
-                                cadena = cadena + token;
-                            }
-                            else
-                            {
+                            cadena = cadena + token;
+                        }
+                        else
+                        {
                             //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
-                            MessageBox.Show(cadena);
-                                sw.WriteLine(cadena);
-                                cadena = token;
-                            }
+                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                            sw.WriteLine(cadena);
+                            cadena = token;
+                        }
                         //Ahora mi fila antigua guarda el valor de la nueva fila
                         fila = nuevafila;
                         //Aumento la posicion
@@ -303,13 +303,67 @@ namespace VisualValley
                         //Le digo que ya utiliza un token y que debe disminuir uno de ellos
                         tokens -= 1;
                         //Inicio el nuevo valor de la fila
-                        if (tokens > 0) {
+                        if (tokens > 0)
+                        {
                             nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
                         }
-                       
+                        else
+                        {
+                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                            sw.WriteLine(cadena);
+                        }
+
 
                     }
-                    sw.Close();
+
+                }
+            }
+            else {
+                File.Delete(@"code.txt");
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    //Guardo la primera posicion de mi lectura
+                    fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                    //Guardo tambien la nueva fila con el mismo valor
+                    nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                    while (tokens > 0)
+                    {
+                        //Guardo el valor del token
+                        token = "" + dataGridView1.Rows[posicion].Cells[0].Value;
+
+                        //Verifico si la fila actual es igual a la nueva fila
+                        if (fila == nuevafila)
+                        {
+                            //Si son las mismas guardo la cadena mas el token
+                            cadena = cadena + token;
+                            MessageBox.Show(cadena);
+                        }
+                        else
+                        {
+                            //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
+                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                            sw.WriteLine(cadena);
+                            cadena = token;
+                        }
+                        //Ahora mi fila antigua guarda el valor de la nueva fila
+                        fila = nuevafila;
+                        //Aumento la posicion
+                        posicion += 1;
+                        //Le digo que ya utiliza un token y que debe disminuir uno de ellos
+                        tokens -= 1;
+                        //Inicio el nuevo valor de la fila
+                        if (tokens > 0)
+                        {
+                            nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+
+                        }
+                        else {
+                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                            sw.WriteLine(cadena);
+                        }
+
+
+                    }
 
                 }
             }

@@ -103,116 +103,116 @@ namespace VisualValley
             case Tipo.S_MAS:
                     return "<operador>";
             case Tipo.S_MENOS:
-                    return "operador";
+                    return "<operador>";
             case Tipo.S_POR:
-                    return "operador";
+                    return "<operador>";
             case Tipo.S_POW:
-                    return "potencia";
+                    return "<potencia>";
             case Tipo.V_ENT:
-                    return "ventero";
+                    return "<ventero>";
             case Tipo.PALABRA:
-                    return "Palabra";
+                    return "<Palabra>";
 
 
 
                 //LIBERMAN
                 case Tipo.S_SUMA:
-                    return "Suma cantidades";
+                    return "<operador>";
                 case Tipo.S_RESTA:
-                    return "Resta cantidades ";
+                    return "<operador>";
                 case Tipo.S_MULTIPLICACION:
-                    return "Multiplica cantidades";
+                    return "<operador>";
                 case Tipo.S_DIVISION:
-                    return "Divide cantidades";
+                    return "<operador>";
                 case Tipo.S_IGUALDAD:
-                    return "igualdad";
+                    return "<igualdad>";
                 case Tipo.S_DISTINTO:
-                    return "Distinto ";
+                    return "<distinto>";
                 case Tipo.S_MAYOR:
-                    return "Numero mayor";
+                    return "<mayor>";
                 case Tipo.S_MENOR:
-                    return "Numero menor ";
+                    return "<menor>";
                 case Tipo.S_MENOR_O_IGUAL:
-                    return "Menor o igual";
+                    return "<menorigual>";
                 case Tipo.S_MAYOR_O_IGUAL:
-                    return "Mayor o igual";
+                    return "<mayorigual>";
                 case Tipo.Y_IZQUIERDA:
-                    return "Inicio de instrucciones";
+                    return "<iinstrucciones>";
                 case Tipo.Y_DERECHA:
-                    return "Fin de instrucciones";
+                    return "<finstrucciones>";
                 case Tipo.S_CADENA:
-                    return "cadena de texto";
+                    return "<cadena>";
                 case Tipo.S_TEXTO_SIMPLE:
-                    return "texto simple";
+                    return "<tsimple>";
                 case Tipo.S_IGUAL:
-                    return "Asigna valor a una variable";
+                    return "<igual>";
                 case Tipo.S_SUMAR:
-                    return "Suma igual a ";
+                    return "<sumaigual>";
                 case Tipo.S_RESTAR:
-                    return "Restar igual a ";
+                    return "<restaigual>";
                 case Tipo.S_RESTO_DE_DIVISION:
-                    return "Residuo de division";
+                    return "<rdivision>";
                 case Tipo.S_O:
-                    return "Compuerta logica O";
+                    return "<compuerta>";
                 case Tipo.S_Y:
-                    return "Compuerta logica Y";
+                    return "<ompuerta>";
                 case Tipo.S_NOT:
-                    return "Compuerta logica NOT";
+                    return "<ompuerta>";
                 case Tipo.S_TERMINA_LINEA:
-                    return "Fin de linea";
+                    return "<finlinea>";
                 case Tipo.S_COM:
-                    return "Comilla";
+                    return "<comilla>";
                 case Tipo.S_COM_SIM:
-                    return "Comilla simple";
+                    return "<comillas>";
                 case Tipo.AUMENTADOR:
-                    return "Aumentador";
+                    return "<Aumentador>";
                 case Tipo.REDUCTOR:
-                    return "Reductor";
+                    return "<Reductor>";
                 case Tipo.ERROR:
-                    return "ERROR";
+                    return "<ERROR>";
 
                 case Tipo.ES_SI:
-                    return "Logica if ";//CHUN
+                    return "<si>";//CHUN
                 case Tipo.ES_SINO:
-                    return "Logica else ";//CHUN
+                    return "<sino> ";//CHUN
                 case Tipo.ES_CAMB:
-                    return "Seleccion Switch ";//CHUN
+                    return "<cambio> ";//CHUN
                 case Tipo.EC_HACER:
-                    return "Do ";//CHUN
+                    return "<hacer> ";//CHUN
                 case Tipo.EC_MIENT:
-                    return "While ";//CHUN
+                    return "<mientras> ";//CHUN
                 case Tipo.EC_PARA:
-                    return "For/Para ";//CHUN
+                    return "<para> ";//CHUN
                 case Tipo.ES_CASO:
-                    return "Casos ";//CHUN
+                    return "<caso> ";//CHUN
                 case Tipo.ES_DESCANSO:
-                    return "Break ";//CHUN
+                    return "<desc> ";//CHUN
                 case Tipo.IDENTIFICADOR:
-                    return "Palabra/Identificador";//CHUn
+                    return "<ide>";//CHUn
 
                 //milton inicio
                 case Tipo.V_FLOAT:
-                    return "Variable flotante";
+                    return "<flotante>";
                 case Tipo.V_DUPLO:
-                    return "Variable duplo";
+                    return "<duplo>";
                 case Tipo.V_CARACTER:
-                    return "Variable caracter";
+                    return "<palabra>";
                 case Tipo.V_CADENA:
-                    return "Variable cadena";
+                    return "<cadena>";
                 case Tipo.V_BOLEANO:
-                    return "Variable boleana";
+                    return "<boleano>";
                 //milton fin
                 //EXTRA
                 case Tipo.PUNTO:
-                    return "Punto";
+                    return "<Punto>";
                 case Tipo.COMA:
-                    return "Coma";
+                    return "<Coma>";
                 case Tipo.INICIO:
-                    return "Inicio del programa";
+                    return "<inicio>";
                 case Tipo.FIN:
-                    return "Fin del programa";
+                    return "<fin>";
                 case Tipo.MENU:
-                    return "Menu Main";
+                    return "<menu>";
 
 
                 default:

@@ -229,6 +229,9 @@ namespace VisualValley
             dataGridView1.BackgroundColor=Color.FromArgb(54, 54, 54);
             dataGridView1.ForeColor = Color.DodgerBlue;
             dataGridView1.DefaultCellStyle.BackColor=Color.FromArgb(54, 54, 54);
+            dataGridView2.BackgroundColor = Color.FromArgb(54, 54, 54);
+            dataGridView2.ForeColor = Color.DodgerBlue;
+            dataGridView2.DefaultCellStyle.BackColor = Color.FromArgb(54, 54, 54);
             menuStrip1.BackColor= Color.FromArgb(31, 31, 31);
             menuStrip1.ForeColor = Color.DodgerBlue;
         }
@@ -248,6 +251,9 @@ namespace VisualValley
             dataGridView1.BackgroundColor = Color.White;
             dataGridView1.ForeColor = Color.Black;
             dataGridView1.DefaultCellStyle.BackColor = Color.White;
+            dataGridView2.BackgroundColor = Color.White;
+            dataGridView2.ForeColor = Color.Black;
+            dataGridView2.DefaultCellStyle.BackColor = Color.White;
             menuStrip1.BackColor = Color.White;
             menuStrip1.ForeColor = Color.Black;
         }

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Collections;
 
 namespace VisualValley
 {
@@ -36,6 +37,10 @@ namespace VisualValley
             }
         }
 
+        int error = 0;
+        Stack especiales = new Stack();
+        //especiales.push para add
+        //especiales.pop para sacar
         //ALFABETO
         String[] alfabeto = {"a","b","c","d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
         , "A","B","C","D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
@@ -336,7 +341,7 @@ namespace VisualValley
                         {
                             //Si son las mismas guardo la cadena mas el token
                             cadena = cadena + token;
-                            MessageBox.Show(cadena);
+ 
                         }
                         else
                         {
@@ -383,6 +388,7 @@ namespace VisualValley
         }
 
         private void analizar() {
+            dataGridView2.Rows.Clear();
             string path = @"code.txt";
             string cadena = "";
             if (!File.Exists(path))
@@ -395,6 +401,111 @@ namespace VisualValley
                     while ((cadena = ReaderObject.ReadLine()) != null)
                     {
                         MessageBox.Show(cadena);
+                        //Nuevo codigo
+                        if (cadena.StartsWith("<ventero>"))
+                        {
+                            if (cadena.Equals("<ventero><ide><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea><finstrucciones>") || cadena.Equals("<entero><ide><finlinea><finstrucciones>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
+                            else
+                            {
+                                error = 1;
+                                if (cadena.StartsWith("<ventero><ide><igual>"))
+                                {
+                                    if (!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error","Se esperaba un valor"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                else
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
+                                else { }
+                            }
+                        }
+                        //Cadena
+                        else if (cadena.StartsWith("<cadena>"))
+                        {
+                            if (cadena.Equals("<cadena><ide><finlinea>") || cadena.Equals("<cadena><ide><igual><comillas><identificador><comilas><fin>") || cadena.Equals("<cadena><ide><igual><nentero><fin>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
+                            else
+                            {
+                                error = 1;
+                                if (cadena.StartsWith("<ventero><ide><igual>"))
+                                {
+                                    if (!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Se esperaba un valor"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                else
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
+                                else { }
+                            }
+                        }
+
+
+                        //Duplo
+                        else if (cadena.StartsWith("<duplo>"))
+                        {
+                            if (cadena.Equals("<duplo><ide><finlinea>") || cadena.Equals("<cadena><ide><igual><comillas><identificador><comilas><fin>") || cadena.Equals("<cadena><ide><igual><comillas><identificador><comilas><fin>") || cadena.Equals("<entero><ide><finlinea><finstrucciones>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
+                            else
+                            {
+                                error = 1;
+                                if (cadena.StartsWith("<ventero><ide><igual>"))
+                                {
+                                    if (!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Se esperaba un valor"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                else
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
+                                else { }
+                            }
+                        }
+
+                        //Booleano
+
+                        //Identificador
+
+
+
+                        //Si
+
+                        //SINO
+
+                        //While
+
+                        //Do While
+
+                        //For
+
+                        //Switch
+                        if (cadena.StartsWith("<cambio>"))
+                        {
+                            if (cadena.Equals("<cambio><parectesisc><ide><parentesisa><iinstrucciones>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura Cambiar"); }
+                            else
+                            {
+                                error = 1;
+                                if (!cadena.Contains("<parectesisc>")) { dataGridView2.Rows.Add("Error", "Debe abrir parentesis"); error = 0; }
+                                if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Debe cerrar el parentesis"); error = 0; }
+                                if (!cadena.Contains("<iinstrucciones>")) { dataGridView2.Rows.Add("Error", "Debe iniciar las instrucciones"); error = 0; }
+                            }
+                        }
+
+                        //Inicio y final
+
+                        //Case
+
+                        //Cierre de instrucciones
                     }
                 }
             }

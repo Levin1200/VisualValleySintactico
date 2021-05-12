@@ -44,10 +44,6 @@ namespace VisualValley
             this.Dev = new System.Windows.Forms.RichTextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.tok = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lex = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.fila = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.columna = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -55,9 +51,13 @@ namespace VisualValley
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.button2 = new System.Windows.Forms.Button();
+            this.tok = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lex = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.fila = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.columna = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.button2 = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -152,6 +152,7 @@ namespace VisualValley
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.AllowUserToResizeRows = false;
             this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.BackgroundColor = System.Drawing.Color.White;
@@ -174,42 +175,12 @@ namespace VisualValley
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersVisible = false;
+            this.dataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView1.RowTemplate.DefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.dataGridView1.Size = new System.Drawing.Size(415, 518);
             this.dataGridView1.TabIndex = 0;
-            // 
-            // tok
-            // 
-            this.tok.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.tok.FillWeight = 105.4265F;
-            this.tok.HeaderText = "Token";
-            this.tok.Name = "tok";
-            this.tok.ReadOnly = true;
-            // 
-            // lex
-            // 
-            this.lex.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.lex.FillWeight = 112.1559F;
-            this.lex.HeaderText = "Lexema";
-            this.lex.Name = "lex";
-            this.lex.ReadOnly = true;
-            // 
-            // fila
-            // 
-            this.fila.HeaderText = "F";
-            this.fila.Name = "fila";
-            this.fila.ReadOnly = true;
-            this.fila.Width = 50;
-            // 
-            // columna
-            // 
-            this.columna.FillWeight = 82.41758F;
-            this.columna.HeaderText = "C";
-            this.columna.Name = "columna";
-            this.columna.ReadOnly = true;
-            this.columna.Width = 50;
             // 
             // textBox1
             // 
@@ -278,6 +249,7 @@ namespace VisualValley
             // 
             this.dataGridView2.AllowUserToAddRows = false;
             this.dataGridView2.AllowUserToDeleteRows = false;
+            this.dataGridView2.AllowUserToResizeRows = false;
             this.dataGridView2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView2.BackgroundColor = System.Drawing.Color.White;
@@ -313,21 +285,6 @@ namespace VisualValley
             this.dataGridView2.Size = new System.Drawing.Size(542, 140);
             this.dataGridView2.TabIndex = 9;
             // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.HeaderText = "Estructura";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 200;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.dataGridViewTextBoxColumn4.FillWeight = 82.41758F;
-            this.dataGridViewTextBoxColumn4.HeaderText = "Detalle";
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            // 
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -342,6 +299,58 @@ namespace VisualValley
             this.button2.Text = "Sintactico";
             this.button2.UseVisualStyleBackColor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click_1);
+            // 
+            // tok
+            // 
+            this.tok.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.tok.FillWeight = 105.4265F;
+            this.tok.HeaderText = "Token";
+            this.tok.Name = "tok";
+            this.tok.ReadOnly = true;
+            this.tok.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // lex
+            // 
+            this.lex.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.lex.FillWeight = 112.1559F;
+            this.lex.HeaderText = "Lexema";
+            this.lex.Name = "lex";
+            this.lex.ReadOnly = true;
+            this.lex.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // fila
+            // 
+            this.fila.HeaderText = "F";
+            this.fila.Name = "fila";
+            this.fila.ReadOnly = true;
+            this.fila.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.fila.Width = 50;
+            // 
+            // columna
+            // 
+            this.columna.FillWeight = 82.41758F;
+            this.columna.HeaderText = "C";
+            this.columna.Name = "columna";
+            this.columna.ReadOnly = true;
+            this.columna.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.columna.Width = 50;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.HeaderText = "Estructura";
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.dataGridViewTextBoxColumn3.Width = 200;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn4.FillWeight = 82.41758F;
+            this.dataGridViewTextBoxColumn4.HeaderText = "Detalle";
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // Form1
             // 
@@ -394,13 +403,13 @@ namespace VisualValley
         private System.Windows.Forms.ToolStripMenuItem modoNormalToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.DataGridView dataGridView2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.DataGridViewTextBoxColumn tok;
         private System.Windows.Forms.DataGridViewTextBoxColumn lex;
         private System.Windows.Forms.DataGridViewTextBoxColumn fila;
         private System.Windows.Forms.DataGridViewTextBoxColumn columna;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
     }
 }
 

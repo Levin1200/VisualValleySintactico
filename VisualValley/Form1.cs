@@ -237,7 +237,7 @@ namespace VisualValley
             dataGridView1.ForeColor = Color.DodgerBlue;
             dataGridView1.DefaultCellStyle.BackColor=Color.FromArgb(54, 54, 54);
             dataGridView2.BackgroundColor = Color.FromArgb(54, 54, 54);
-            dataGridView2.ForeColor = Color.DodgerBlue;
+            dataGridView2.ForeColor = Color.White;
             dataGridView2.DefaultCellStyle.BackColor = Color.FromArgb(54, 54, 54);
             menuStrip1.BackColor= Color.FromArgb(31, 31, 31);
             menuStrip1.ForeColor = Color.DodgerBlue;
@@ -406,7 +406,7 @@ namespace VisualValley
                         //Nuevo codigo
                         if (cadena.StartsWith("<ventero>"))
                         {
-                            if (cadena.Equals("<ventero><ide><finlinea>") || cadena.Equals("<ventero><ide><Coma><ide><fin>") || cadena.Equals(" <ventero><ide><igual><nentero><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea><finstrucciones>") || cadena.Equals("<entero><ide><finlinea><finstrucciones>"))
+                            if (cadena.Equals("<ventero><ide><finlinea>") || cadena.Equals("<ventero><ide><Coma><ide><fin>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea><finstrucciones>") || cadena.Equals("<entero><ide><finlinea><finstrucciones>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
                             else
                             {
@@ -554,7 +554,6 @@ namespace VisualValley
                             { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); especiales.Push("<si>"); tsi += 1; }
                             else
                             {
-                                MessageBox.Show("Voy por el si" + cadena);
                                 error = 0;
                                 if (!cadena.Contains("<parentesisc>")) { dataGridView2.Rows.Add("Error", "SI Debe abrir parentesis"); error = 1; }
                                 if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "SI Debe cerrar parentesis"); error = 1; }
@@ -573,18 +572,12 @@ namespace VisualValley
                         //SINO
                         if (cadena.StartsWith("<sino>"))
                         {
-                            if (cadena.Equals("<sino><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<sino><iinstrucciones>"))
+                            if (cadena.Equals("<sino><iinstrucciones>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura Sino"); especiales.Push("<sino>"); tsino += 1; }
                             else
                             {
                                 error = 0;
-                                if (!cadena.Contains("iinstrucciones>"))
-                                {
-                                    dataGridView2.Rows.Add("Error", "SINO Se esperaba que iniciara las instrucciones"); error = 0;
-
-                                    if (error == 0) { dataGridView2.Rows.Add("Error", "SINO Analisis detenido, se han especificado demasiados valores"); }
-                                }
+                                if (!cadena.Contains("iinstrucciones>")) {dataGridView2.Rows.Add("Error", "SINO Se esperaba que iniciara las instrucciones"); error = 0;}
                             }
                         }
 
@@ -593,12 +586,11 @@ namespace VisualValley
                             if (cadena.StartsWith("<mientras>"))
                             {
 
-                                if (cadena.Equals("<mientras><parentesisa><ide><igual><ide><parentesisc>") || cadena.Equals("<mientras><parentesisa><ide><mayor><ide><parentesisc>") || cadena.Equals("<mientras><parentesisa><ide><mayor><igual><ide><parentesisc>") || cadena.Equals("<mientras><parentesisa><ide><menor><igual><ide><parentesisc>"))
+                                if (cadena.Equals("<mientras><parentesisa><ide><comparador><ide><parentesisc><iinstrucciones>") || cadena.Equals("<mientras><parentesisa><ide><comparador><nentero><parentesisc><iinstrucciones>") || cadena.Equals("<mientras><parentesisa><nentero><comparador><ide><parentesisc><iinstrucciones>"))
                                 { dataGridView2.Rows.Add("Correcto", "Estructura Mientras"); especiales.Push("<mientras>"); tmientras += 1; }
                                 else
                                 {
                                     error = 0;
-                                    MessageBox.Show("Voy por el mientras" + cadena);
                                     if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Mientras Debe abrir parentesis"); error = 1; }
                                     if (!cadena.Contains("<parentesisc>")) { dataGridView2.Rows.Add("Error", "Mientras Debe cerrar parentesis"); error = 1; }
                                     if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Mientras Se esperaba un identificador"); error = 1; }

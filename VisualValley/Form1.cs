@@ -271,7 +271,6 @@ namespace VisualValley
             {
                
                 // Si no existe crea el archivo
-                MessageBox.Show("Antes del error");
                 using (StreamWriter sw = File.CreateText(path))
                 {
                     //Guardo la primera posicion de mi lectura
@@ -317,6 +316,7 @@ namespace VisualValley
                     }
 
                 }
+                analizar();
             }
             else {
                 File.Delete(@"code.txt");
@@ -366,6 +366,7 @@ namespace VisualValley
                     }
 
                 }
+                analizar();
             }
 
           
@@ -381,19 +382,23 @@ namespace VisualValley
             sintactico();
         }
 
-        private void crear() {
-            
-
-            /*
-            using (StreamReader sr = File.OpenText(path))
+        private void analizar() {
+            string path = @"code.txt";
+            string cadena = "";
+            if (!File.Exists(path))
             {
-                string s = "";
-                while ((s = sr.ReadLine()) != null)
+                //Si no existe
+            }
+            else {
+                using (StreamReader ReaderObject = new StreamReader(path))
                 {
-                    Console.WriteLine(s);
+                    while ((cadena = ReaderObject.ReadLine()) != null)
+                    {
+                        MessageBox.Show(cadena);
+                    }
                 }
             }
-            */
+                
         }
     }
 }

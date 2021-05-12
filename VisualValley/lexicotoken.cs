@@ -134,9 +134,9 @@ namespace VisualValley
                 case Tipo.S_MENOR:
                     return "<menor>";
                 case Tipo.S_MENOR_O_IGUAL:
-                    return "<menorigual>";
+                    return "<comparador>";
                 case Tipo.S_MAYOR_O_IGUAL:
-                    return "<mayorigual>";
+                    return "<comparador>";
                 case Tipo.Y_IZQUIERDA:
                     return "<iinstrucciones>";
                 case Tipo.Y_DERECHA:
@@ -166,9 +166,9 @@ namespace VisualValley
                 case Tipo.S_COM_SIM:
                     return "<comillas>";
                 case Tipo.AUMENTADOR:
-                    return "<Aumentador>";
+                    return "<aumentador>";
                 case Tipo.REDUCTOR:
-                    return "<Reductor>";
+                    return "<reductor>";
                 case Tipo.ERROR:
                     return "<ERROR>";
 

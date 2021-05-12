@@ -551,6 +551,7 @@ namespace VisualValley
                                 || cadena.Equals("<si><parentesisa><ide><mayor><ide><compuerta><ide><menor><ide><parectesisc><iinstrucciones><finstrucciones>")
                                 || cadena.Equals("<si><parentesisa><ide><mayor><nentero><compuerta><ide><menor><nentero><parectesisc><iinstrucciones><finstrucciones>")
                                 || cadena.Equals("<si><parentesisa><ide><mayor><ide><compuerta><compuerta><ide><menor><ide><parectesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><parectesisc><iinstrucciones><finstrucciones>")
                                 || cadena.Equals("<si><parentesisa><ide><mayor><igual><ide><parectesisc><iinstrucciones><finstrucciones>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); especiales.Push("<si>"); }
                         } 
@@ -569,24 +570,15 @@ namespace VisualValley
                         //SINO
                         if (cadena.StartsWith("<sino>"))
                     {
-                        if (cadena.Equals("<sino><parentesis><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><mayor><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><menor><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><compuerta><ide><parentesis><instrucciones><finlinea><finstrucciones>"))
-                           ||(cadena.Equals("<sino><parentesis><mayor><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><menor><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>"))
+                        if (cadena.Equals("<sino><parentesis><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><mayor><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><menor><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><compuerta><ide><parentesis><instrucciones><finlinea><finstrucciones>")
+                           ||(cadena.Equals("<sino><parentesis><mayor><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><menor><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>")))
                            { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
                         else
                         {
-                            error = 0;
-                            if (cadena.StartsWith("<duplo><ide><igual>"))
-                            {
-                                if (!cadena.Contains("<duplo>")) { dataGridView2.Rows.Add("Error", "Se esperaba un valor"); error = 0; }
-                                if (!cadena.Contains("<neafinliena>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
-                            }
-                            else
-                            {
-                                if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
-                                if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
-                            }
+                            error = 0;                     
+                            if (!cadena.Contains("parentesis>")) { dataGridView2.Rows.Add("Error", "Se esperaba que habriera parentesis"); error = 0; }
+                            if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se espera"); error = 0; }                     
                             if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
-                            else { }
                         }
                     }
 

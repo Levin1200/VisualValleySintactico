@@ -156,9 +156,9 @@ namespace VisualValley
                 case Tipo.S_O:
                     return "<compuerta>";
                 case Tipo.S_Y:
-                    return "<ompuerta>";
+                    return "<compuerta>";
                 case Tipo.S_NOT:
-                    return "<ompuerta>";
+                    return "<compuerta>";
                 case Tipo.S_TERMINA_LINEA:
                     return "<finlinea>";
                 case Tipo.S_COM:

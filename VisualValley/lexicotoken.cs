@@ -96,7 +96,7 @@ namespace VisualValley
             case Tipo.N_REAL:
                     return "<decimal>";
             case Tipo.P_DER:
-                    return "<parectesisc>";
+                    return "<parentesisc>";
             case Tipo.P_IZQ:
                     return "<parentesisa>";
             case Tipo.S_DIV:
@@ -130,9 +130,9 @@ namespace VisualValley
                 case Tipo.S_DISTINTO:
                     return "<distinto>";
                 case Tipo.S_MAYOR:
-                    return "<mayor>";
+                    return "<comparador>";
                 case Tipo.S_MENOR:
-                    return "<menor>";
+                    return "<comparador>";
                 case Tipo.S_MENOR_O_IGUAL:
                     return "<comparador>";
                 case Tipo.S_MAYOR_O_IGUAL:

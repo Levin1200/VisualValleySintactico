@@ -406,7 +406,7 @@ namespace VisualValley
                         //Nuevo codigo
                         if (cadena.StartsWith("<ventero>"))
                         {
-                            if (cadena.Equals("<ventero><ide><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea><finstrucciones>") || cadena.Equals("<entero><ide><finlinea><finstrucciones>"))
+                            if (cadena.Equals("<ventero><ide><finlinea>") || cadena.Equals("<ventero><ide><Coma><ide><fin>") || cadena.Equals(" <ventero><ide><igual><nentero><finlinea>") || cadena.Equals("<ventero><ide><igual><nentero><finlinea><finstrucciones>") || cadena.Equals("<entero><ide><finlinea><finstrucciones>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
                             else
                             {
@@ -418,6 +418,7 @@ namespace VisualValley
                                 }
                                 else
                                 {
+                                    if (!cadena.Contains("<Coma>")) { dataGridView2.Rows.Add("Error", "Se esperaba una coma"); error = 0; }
                                     if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
                                     if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
                                 }
@@ -494,8 +495,8 @@ namespace VisualValley
                                 }
                                 else
                                 {
-                                    if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "Se esperaba ugno igualn si"); error = 0; }
                                     if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                    if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "Se esperaba signo igual"); error = 0; }
                                     if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
                                 }
                                 if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
@@ -509,6 +510,41 @@ namespace VisualValley
                         //Identificador
 
 
+                        if (cadena.StartsWith("<ide>"))
+                        {
+                            if (cadena.Equals("<ide><igual><nnumero><operador><nnumero><finlinea>") || cadena.Equals("<ide><igual><ide><operador><ide><finlinea>") || cadena.Equals("<ide><igual><nnumero><operador><ide>") || cadena.Equals("<ide><igual><ide><operador><nnumero><finlinea>") || cadena.Equals("<ide><igual><ide><operador><parentesisa><ide><operador><ide><parentesisc><finlinea>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura Cambiar"); especiales.Push("<cambio>"); }
+                            else
+                            {
+                                error = 1;
+                                if (cadena.StartsWith("<ide><igual>"))
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaban un identificador"); error = 0; }
+                                    if (!cadena.Contains("<operador>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                    if (!cadena.Contains("<nnumero>")) { dataGridView2.Rows.Add("Error", "Se esperaba un valor"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba un operador"); error = 0; }
+                                    if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Se esperaba un ("); error = 0; }
+                                    if (!cadena.Contains("<parentesisc>")) { dataGridView2.Rows.Add("Error", "Se esperaba un )"); error = 0; }
+                                }
+                                else
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 0; }
+                                    if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "Se esperaba signo igual"); error = 0; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
+                                }
+                                if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
+                                else { }
+                            }
+                        }
+
+
+
+
+
+
+
+
+
 
                         //Si
 
@@ -517,12 +553,12 @@ namespace VisualValley
                             // if( ){
                             //<si><parentesisa><ide><igualdad><ide><parentesis><fininstrucciones>
                             if (cadena.Equals("<si><parentesisa><ide><igualdad><ide><parectesisc><iinstrucciones><finstrucciones>") || cadena.Equals("<si><parentesisa><ide><mayor><ide><parectesisc><iinstrucciones><finstrucciones>") || cadena.Equals("<si><parentesisa><ide><menor><ide><parectesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><parectesisc><iinstrucciones><finstrucciones>"))
+                                || cadena.Equals("<si><parentesisa><ide><mayor><igual><ide><parectesisc><iinstrucciones><finstrucciones>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
                             else
                             {
                                 error = 1;
-                                if (cadena.StartsWith("<cadena><ide><igual>"))
+                                if (cadena.StartsWith("<si><parentesisa><ide>"))
                                 {
                                     if (!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Se esperaba un valor"); error = 0; }
                                     if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Se esperaba fin de linea"); error = 0; }
@@ -539,14 +575,26 @@ namespace VisualValley
 
 
                         //SINO
-
-                         
-
+                      
                         //While
 
                         //Do While
 
                         //For
+                        if (cadena.StartsWith("<para>"))
+                        {
+                            if (cadena.Equals("<cambio><parectesisc><ide><parentesisa><iinstrucciones>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura Cambiar"); especiales.Push("<cambio>"); }
+                            else
+                            {
+                                error = 0;
+                                if (!cadena.Contains("<parectesisc>")) { dataGridView2.Rows.Add("Error", "Debe abrir parentesis"); error = 1; }
+                                if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 1; }
+                                if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Debe cerrar el parentesis"); error = 1; }
+                                if (!cadena.Contains("<iinstrucciones>")) { dataGridView2.Rows.Add("Error", "Debe iniciar las instrucciones"); error = 1; }
+                            }
+                        }
+
 
                         //Switch
                         if (cadena.StartsWith("<cambio>"))
@@ -568,15 +616,29 @@ namespace VisualValley
                         //Case
                         if (cadena.StartsWith("<caso>"))
                         {
-                            if (cadena.Equals("<caso><comilla><ide><comilla><dospuntos><iinstrucciones>")||cadena.Equals("<caso><comilla><nentero><comilla><dospuntos><iinstrucciones>"))
-                            { dataGridView2.Rows.Add("Correcto", "Estructura Cambiar"); especiales.Push("<caso>"); }
+                            error = 0;
+                            if (cadena.Equals("<caso><comilla><Palabra><comilla><dospuntos><iinstrucciones>") ||cadena.Equals("<caso><comilla><nentero><comilla><dospuntos><iinstrucciones>")||
+                                cadena.Equals("<caso><comilla><Palabra><comilla><dospuntos><iinstrucciones><desc><finlinea><finstrucciones>")|| 
+                                cadena.Equals("<caso><comilla><nentero><comilla><dospuntos><iinstrucciones><desc><finlinea><finstrucciones>")||
+                                cadena.Equals("<caso><comilla><Palabra><comilla><dospuntos><iinstrucciones><desc><finlinea>")||
+                                cadena.Equals("<caso><comilla><nentero><comilla><dospuntos><iinstrucciones><desc><finlinea>"))
+                            { if (cadena.Equals("<caso><comilla><Palabra><comilla><dospuntos><iinstrucciones><desc><finlinea><finstrucciones>") || cadena.Equals("<caso><comilla><nentero><comilla><dospuntos><iinstrucciones><desc><finlinea><finstrucciones>"))
+                                { } else { dataGridView2.Rows.Add("Correcto", "Estructura Cambiar"); especiales.Push("<caso>"); }
+                                 }
                             else
                             {
-                                error = 0;
-                                if (!cadena.Contains("<parectesisc>")) { dataGridView2.Rows.Add("Error", "Debe abrir parentesis"); error = 1; }
-                                if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se esperaba un identificador"); error = 1; }
-                                if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Debe cerrar el parentesis"); error = 1; }
-                                if (!cadena.Contains("<iinstrucciones>")) { dataGridView2.Rows.Add("Error", "Debe iniciar las instrucciones"); error = 1; }
+                                if (cadena.Equals("<caso><comilla><Palabra><comilla><dospuntos><iinstrucciones><desc>") || cadena.Equals("<caso><comilla><nentero><comilla><dospuntos><iinstrucciones><desc>"))
+                                {
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Faltan fin linea"); error = 1; }
+                                }
+                                else {
+                                    if (!cadena.Contains("<comilla>")) { dataGridView2.Rows.Add("Error", "Faltan comillas"); error = 1; }
+                                    if (!cadena.Contains("<Palabra>") || !cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Se esperaba un valor"); error = 1; }
+                                    if (!cadena.Contains("<dospuntos>")) { dataGridView2.Rows.Add("Error", "Falta :"); error = 1; }
+                                    if (!cadena.Contains("<iinstrucciones>")) { dataGridView2.Rows.Add("Error", "Debe iniciar las instrucciones"); error = 1; }
+                                }
+                               
+                                
                             }
                         }
 

@@ -565,24 +565,29 @@ namespace VisualValley
                             if (!cadena.Contains("<iinstrucciones>")) { dataGridView2.Rows.Add("Error", "Debe iniciar las instrucciones"); error = 1; }
                             if (error == 0) { dataGridView2.Rows.Add("Error", "Se han especificado demasiados valores"); }
                         }
-                    
+
+
 
                         //SINO
                         if (cadena.StartsWith("<sino>"))
-                    {
-                        if (cadena.Equals("<sino><parentesis><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><mayor><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><menor><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><compuerta><ide><parentesis><instrucciones><finlinea><finstrucciones>")
-                           ||(cadena.Equals("<sino><parentesis><mayor><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>") || cadena.Equals("<sino><parentesis><menor><igualdad><ide><parentesis><instrucciones><finlinea><finstrucciones>")))
-                           { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
-                        else
                         {
-                            error = 0;                     
-                            if (!cadena.Contains("parentesis>")) { dataGridView2.Rows.Add("Error", "Se esperaba que habriera parentesis"); error = 0; }
-                            if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Se espera"); error = 0; }                     
-                            if (error == 1) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
+                            if (cadena.Equals("<sino><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<sino><iinstrucciones>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
+                            else
+                            {
+                                error = 0;
+                                if (!cadena.Contains("iinstrucciones>"))
+                                {
+                                    dataGridView2.Rows.Add("Error", "Se esperaba que iniciara las instrucciones"); error = 0;
+
+                                    if (error == 0) { dataGridView2.Rows.Add("Error", "Analisis detenido, se han especificado demasiados valores"); }
+                                }
+                            }
                         }
-                    }
 
                     //While
+
 
                     //Do While
 

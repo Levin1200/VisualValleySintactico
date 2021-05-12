@@ -126,7 +126,7 @@ namespace VisualValley
                 case Tipo.S_DIVISION:
                     return "<operador>";
                 case Tipo.S_IGUALDAD:
-                    return "<igualdad>";
+                    return "<comparador>";
                 case Tipo.S_DISTINTO:
                     return "<distinto>";
                 case Tipo.S_MAYOR:

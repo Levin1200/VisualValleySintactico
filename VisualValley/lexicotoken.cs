@@ -68,7 +68,8 @@ namespace VisualValley
         COMA,
         INICIO,
         FIN,
-        MENU
+        MENU,
+        DOSPUNTOS
 
         }
 
@@ -213,7 +214,8 @@ namespace VisualValley
                     return "<fin>";
                 case Tipo.MENU:
                     return "<menu>";
-
+                case Tipo.DOSPUNTOS:
+                    return "<dospuntos>";
 
                 default:
                     return "Desconocido";

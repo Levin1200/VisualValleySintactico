@@ -81,6 +81,13 @@ namespace VisualValley
                             agregarToken(lexicotoken.Tipo.S_POR);
                             
                         }
+                        else if (c.CompareTo(':') == 0)
+                        {
+                            lexaux += c;
+                            columna += 1;
+                            agregarToken(lexicotoken.Tipo.DOSPUNTOS);
+
+                        }
                         else if (c.CompareTo('/') == 0)
                         {
                             lexaux += c;

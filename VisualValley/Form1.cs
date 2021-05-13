@@ -386,6 +386,10 @@ namespace VisualValley
 
         private void button2_Click_1(object sender, EventArgs e)
         {
+            especiales.Clear();
+            error = 0;
+            si = false; sino = false; cambiar = false; mientras = false; para = false; caso = false; hacer = false; inicios = false; fines = false; //Verifica si estan activos los especiales
+            tsi = 0; tsino = 0; tcambiar = 0; tmientras = 0; tpara = 0; tcaso = 0; thacer = 0; ecadena = 0;
             sintactico();
         }
 
@@ -402,7 +406,7 @@ namespace VisualValley
                 {
                     while ((cadena = ReaderObject.ReadLine()) != null)
                     {
-                        MessageBox.Show(cadena);
+                        //MessageBox.Show(cadena);
                         //Nuevo codigo
                         //Inicio
                         if (cadena.StartsWith("<inicio>"))
@@ -468,7 +472,7 @@ namespace VisualValley
                         //Duplo
                         if (cadena.StartsWith("<duplo>"))
                         {
-                            if (cadena.Equals("<duplo><ide><finlinea>") || cadena.Equals("<duplo><ide><igual><nentero><finlinealinea>") || cadena.Equals("<duplo><ide><igual><nentero><operador><nentero><finlinea>") || cadena.Equals("<duplo><ide><igual><ide><operador><ide><finlinea>") || cadena.Equals("<duplo><ide><igual><decimal><finlinea>") || cadena.Equals("<duplo><ide><igual><ide><finlinea>"))
+                            if (cadena.Equals("<duplo><ide><finlinea>") || cadena.Equals("<duplo><ide><igual><decimal><finlinealinea>") || cadena.Equals("<duplo><ide><igual><nentero><finlinealinea>") || cadena.Equals("<duplo><ide><igual><nentero><operador><nentero><finlinea>") || cadena.Equals("<duplo><ide><igual><ide><operador><ide><finlinea>") || cadena.Equals("<duplo><ide><igual><decimal><finlinea>") || cadena.Equals("<duplo><ide><igual><ide><finlinea>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea"); }
                             else
                             {
@@ -522,23 +526,21 @@ namespace VisualValley
 
                         if (cadena.StartsWith("<ide>"))
                         {
-                            if (cadena.Equals("<ide><igual><nnumero><operador><nnumero><finlinea>") || cadena.Equals("<ide><igual><parentesisa><ide><operador><ide><parentesisc> operador >< ide >< finlinea > ") || cadena.Equals(" <ide><igual><ide><operador><ide><finlinea>") || cadena.Equals("<ide><igual><nnumero><operador><ide>") || cadena.Equals("<ide><igual><ide><operador><nnumero><finlinea>") || cadena.Equals("<ide><igual><ide><operador><parentesisa><ide><operador><ide><parentesisc><finlinea>"))
-                            { dataGridView2.Rows.Add("Correcto", "Estructura Correcta"); especiales.Push("<cambio>"); }
+                            if (cadena.Equals("<ide><igual><nentero><finlinea>") 
+                                || cadena.Equals("<ide><igual><verdadero><finlinea>") 
+                                || cadena.Equals("<ide><igual><falso><finlinea>") 
+                                || cadena.Equals("<ide><igual><decimal><finlinea>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura Correcta"); }
                             else
                             {
                                 error = 1;
                                 if (cadena.StartsWith("<ide><igual>"))
                                 {
-                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaban un identificador"); error = 0; }
-                                    if (!cadena.Contains("<operador>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba un identificador"); error = 0; }
-                                    if (!cadena.Contains("<nnumero>")) { dataGridView2.Rows.Add("Error", "IdeSe esperaba un valor"); error = 0; }
+                                    if (!cadena.Contains("<ide>")||!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaban un valor"); error = 0; }
                                     if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba un operador"); error = 0; }
-                                    if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba un ("); error = 0; }
-                                    if (!cadena.Contains("<parentesisc>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba un )"); error = 0; }
                                 }
                                 else
                                 {
-                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba un identificador"); error = 0; }
                                     if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba signo igual"); error = 0; }
                                     if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Ide Se esperaba fin de linea"); error = 0; }
                                 }
@@ -551,20 +553,23 @@ namespace VisualValley
 
                         if (cadena.StartsWith("<si>"))
                         {
-                            if (cadena.Equals("<si><parentesisa><ide><igualdad><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><menor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><compuerta><compuerta><ide><menor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><igual><ide><compuerta><compuerta><ide><menor><igual><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><compuerta><compuerta><ide><menor><igual><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><igual><ide><compuerta><ide><menor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><compuerta><ide><menor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><nentero><compuerta><ide><menor><nentero><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><ide><compuerta><compuerta><ide><menor><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><compuerta><igual><ide><parentesisc><iinstrucciones><finstrucciones>")
-                                || cadena.Equals("<si><parentesisa><ide><mayor><igual><ide><parentesisc><iinstrucciones><finstrucciones>"))
-                            { dataGridView2.Rows.Add("Correcto", "Estructura Si"); especiales.Push("<si>"); tsi += 1; si = true; }
+                            if (cadena.Equals("<si><parentesisa><ide><comparador><ide><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><comparador><ide><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><nentero><comparador><nentero><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><nentero><comparador><ide><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><comparador><nentero><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><decimal><comparador><decimal><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><decimal><comparador><ide><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><comparador><decimal><parentesisc><iinstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><comparador><ide><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><nentero><comparador><nentero><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><nentero><comparador><ide><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><comparador><nentero><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><decimal><comparador><decimal><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><decimal><comparador><ide><parentesisc><iinstrucciones><finstrucciones>")
+                                || cadena.Equals("<si><parentesisa><ide><comparador><decimal><parentesisc><iinstrucciones><finstrucciones>"))
+                            {
+                                if (cadena.EndsWith("<finstrucciones>")) { dataGridView2.Rows.Add("Correcto", "Estructura Si"); } else { dataGridView2.Rows.Add("Correcto", "Estructura Si"); especiales.Push("<si>"); tsi += 1; si = true; }}
                             else
                             {
                                 error = 0;

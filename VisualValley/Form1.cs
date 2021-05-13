@@ -113,6 +113,7 @@ namespace VisualValley
 
         private void button1_Click(object sender, EventArgs e)
         {
+            button2.Enabled = true;
             //int lineas = textBox2.Lines.Count();
             int lineas = Dev.Lines.Count();
             entrada = null;
@@ -266,115 +267,124 @@ namespace VisualValley
         }
 
         private void sintactico() {
-            int tokens = dataGridView1.Rows.Count-1;
-            int posicion = 0;
-            string token = "";
-            int fila=0;
-            int nuevafila = 0;
-            string cadena = "";
-            //Escritura del archivo de texto
-            string path = @"code.txt";
-            if (!File.Exists(path))
+            try
             {
-               
-                // Si no existe crea el archivo
-                using (StreamWriter sw = File.CreateText(path))
+                int tokens = dataGridView1.Rows.Count - 1;
+                int posicion = 0;
+                string token = "";
+                int fila = 0;
+                int nuevafila = 0;
+                string cadena = "";
+                //Escritura del archivo de texto
+                string path = @"code.txt";
+                if (!File.Exists(path))
                 {
-                    //Guardo la primera posicion de mi lectura
-                    fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
-                    //Guardo tambien la nueva fila con el mismo valor
-                    nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
-                    while (tokens > 0)
+
+                    // Si no existe crea el archivo
+                    using (StreamWriter sw = File.CreateText(path))
                     {
-                        //Guardo el valor del token
-                        token = "" + dataGridView1.Rows[posicion].Cells[0].Value;
+                        //Guardo la primera posicion de mi lectura
+                        try { fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString()); } catch { }
+                      
+                        //Guardo tambien la nueva fila con el mismo valor
+                        nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                        while (tokens > 0)
+                        {
+                            //Guardo el valor del token
+                            token = "" + dataGridView1.Rows[posicion].Cells[0].Value;
 
-                        //Verifico si la fila actual es igual a la nueva fila
-                        if (fila == nuevafila)
-                        {
-                            //Si son las mismas guardo la cadena mas el token
-                            cadena = cadena + token;
-                        }
-                        else
-                        {
-                            //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
-                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
-                            sw.WriteLine(cadena);
-                            cadena = token;
-                        }
-                        //Ahora mi fila antigua guarda el valor de la nueva fila
-                        fila = nuevafila;
-                        //Aumento la posicion
-                        posicion += 1;
-                        //Le digo que ya utiliza un token y que debe disminuir uno de ellos
-                        tokens -= 1;
-                        //Inicio el nuevo valor de la fila
-                        if (tokens > 0)
-                        {
-                            nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
-                        }
-                        else
-                        {
-                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
-                            sw.WriteLine(cadena);
-                        }
+                            //Verifico si la fila actual es igual a la nueva fila
+                            if (fila == nuevafila)
+                            {
+                                //Si son las mismas guardo la cadena mas el token
+                                cadena = cadena + token;
+                            }
+                            else
+                            {
+                                //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                                cadena = token;
+                            }
+                            //Ahora mi fila antigua guarda el valor de la nueva fila
+                            fila = nuevafila;
+                            //Aumento la posicion
+                            posicion += 1;
+                            //Le digo que ya utiliza un token y que debe disminuir uno de ellos
+                            tokens -= 1;
+                            //Inicio el nuevo valor de la fila
+                            if (tokens > 0)
+                            {
+                                nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                            }
+                            else
+                            {
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                            }
 
+
+                        }
 
                     }
-
+                    analizar();
                 }
-                analizar();
-            }
-            else {
-                File.Delete(@"code.txt");
-                using (StreamWriter sw = File.CreateText(path))
+                else
                 {
-                    //Guardo la primera posicion de mi lectura
-                    fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
-                    //Guardo tambien la nueva fila con el mismo valor
-                    nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
-                    while (tokens > 0)
+                    File.Delete(@"code.txt");
+                    using (StreamWriter sw = File.CreateText(path))
                     {
-                        //Guardo el valor del token
-                        token = "" + dataGridView1.Rows[posicion].Cells[0].Value;
-
-                        //Verifico si la fila actual es igual a la nueva fila
-                        if (fila == nuevafila)
+                        //Guardo la primera posicion de mi lectura
+                        try { fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString()); } catch { }
+                       
+                        //Guardo tambien la nueva fila con el mismo valor
+                        nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                        while (tokens > 0)
                         {
-                            //Si son las mismas guardo la cadena mas el token
-                            cadena = cadena + token;
- 
-                        }
-                        else
-                        {
-                            //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
-                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
-                            sw.WriteLine(cadena);
-                            cadena = token;
-                        }
-                        //Ahora mi fila antigua guarda el valor de la nueva fila
-                        fila = nuevafila;
-                        //Aumento la posicion
-                        posicion += 1;
-                        //Le digo que ya utiliza un token y que debe disminuir uno de ellos
-                        tokens -= 1;
-                        //Inicio el nuevo valor de la fila
-                        if (tokens > 0)
-                        {
-                            nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                            //Guardo el valor del token
+                            token = "" + dataGridView1.Rows[posicion].Cells[0].Value;
+
+                            //Verifico si la fila actual es igual a la nueva fila
+                            if (fila == nuevafila)
+                            {
+                                //Si son las mismas guardo la cadena mas el token
+                                cadena = cadena + token;
+
+                            }
+                            else
+                            {
+                                //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                                cadena = token;
+                            }
+                            //Ahora mi fila antigua guarda el valor de la nueva fila
+                            fila = nuevafila;
+                            //Aumento la posicion
+                            posicion += 1;
+                            //Le digo que ya utiliza un token y que debe disminuir uno de ellos
+                            tokens -= 1;
+                            //Inicio el nuevo valor de la fila
+                            if (tokens > 0)
+                            {
+                                nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+
+                            }
+                            else
+                            {
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                            }
+
 
                         }
-                        else {
-                            cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
-                            sw.WriteLine(cadena);
-                        }
-
 
                     }
-
+                    analizar();
                 }
-                analizar();
             }
+            catch { MessageBox.Show("Aslgo ha sucedido"); }
+           
 
           
 
@@ -447,7 +457,9 @@ namespace VisualValley
                         //Cadena
                          if (cadena.StartsWith("<cadena>"))
                         {
-                            if (cadena.Equals("<cadena><ide><finlinea>") || cadena.Equals("<cadena><ide><igual><comillas><ider><comilas><finlinea>") || cadena.Equals("<cadena><ide><igual><nentero><finlinea>") || cadena.Equals("<cadena><ide><igual><comillas><identificador><comilas><operador><ide><finlinea>")) 
+                            if (cadena.Equals("<cadena><ide><finlinea>") 
+                                || cadena.Equals("<cadena><ide><igual><comilla><ide><comilla><finlinea>")
+                                 || cadena.Equals("<cadena><ide><igual><ide><finlinea>"))
                             { dataGridView2.Rows.Add("Correcto", "Estructura Cadena", linea); }
                             else
                             {
@@ -571,7 +583,8 @@ namespace VisualValley
                                 || cadena.Equals("<si><parentesisa><decimal><comparador><ide><parentesisc><iinstrucciones><finstrucciones>")
                                 || cadena.Equals("<si><parentesisa><ide><comparador><decimal><parentesisc><iinstrucciones><finstrucciones>"))
                             {
-                                if (cadena.EndsWith("<finstrucciones>")) { dataGridView2.Rows.Add("Correcto", "Estructura Si", linea); } else { dataGridView2.Rows.Add("Correcto", "Estructura Si", linea); especiales.Push("<si>"); tsi += 1; si = true; }}
+                                if (cadena.EndsWith("<finstrucciones>")) { dataGridView2.Rows.Add("Correcto", "Estructura Si", linea); } else { dataGridView2.Rows.Add("Correcto", "Estructura Si", linea); especiales.Push("<si>"); tsi += 1; si = true; }
+                            }
                             else
                             {
                                 error = 0;

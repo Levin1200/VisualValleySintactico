@@ -71,7 +71,8 @@ namespace VisualValley
         MENU,
         DOSPUNTOS,
         VERDADERO,
-        FALSO
+        FALSO,
+        MENSAJE
 
         }
 
@@ -209,7 +210,7 @@ namespace VisualValley
                 case Tipo.PUNTO:
                     return "<Punto>";
                 case Tipo.COMA:
-                    return "<Coma>";
+                    return "<coma>";
                 case Tipo.INICIO:
                     return "<inicio>";
                 case Tipo.FIN:
@@ -222,6 +223,8 @@ namespace VisualValley
                     return "<verdadero>";
                 case Tipo.FALSO:
                     return "<falso>";
+                case Tipo.MENSAJE:
+                    return "<mensaje>";
 
                 default:
                     return "Desconocido";

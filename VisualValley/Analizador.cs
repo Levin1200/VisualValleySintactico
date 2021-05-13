@@ -409,6 +409,10 @@ namespace VisualValley
                             {
                                 goto case 62;
                             }
+                        else if (lexaux == "mensaje")
+                        {
+                            goto case 63;
+                        }
                         else
                             {
                                 goto case 60;
@@ -834,6 +838,16 @@ namespace VisualValley
                         aux2 = lexaux.Length;
                         columna -= (aux2 - 1);
                         agregarToken(lexicotoken.Tipo.FALSO);
+                        columna += (aux2 - 1);
+                        columna += 1;
+                        if (comprobadorletra == 0) { }
+                        else { comprobadorletra = 0; estado = 0; i -= 1; columna -= 1; }
+                        break;
+                    case 63:
+                        aux2 = 0;
+                        aux2 = lexaux.Length;
+                        columna -= (aux2 - 1);
+                        agregarToken(lexicotoken.Tipo.MENSAJE);
                         columna += (aux2 - 1);
                         columna += 1;
                         if (comprobadorletra == 0) { }

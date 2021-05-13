@@ -197,6 +197,7 @@ namespace VisualValley
                         }
                         else if (c.CompareTo('\"') == 0)
                         {
+                            //COMENZAR CADENA
                             lexaux += c;
                             columna += 1;
                             agregarToken(lexicotoken.Tipo.S_COM);
@@ -848,6 +849,16 @@ namespace VisualValley
                         aux2 = lexaux.Length;
                         columna -= (aux2 - 1);
                         agregarToken(lexicotoken.Tipo.MENSAJE);
+                        columna += (aux2 - 1);
+                        columna += 1;
+                        if (comprobadorletra == 0) { }
+                        else { comprobadorletra = 0; estado = 0; i -= 1; columna -= 1; }
+                        break;
+                    case 64:
+                        aux2 = 0;
+                        aux2 = lexaux.Length;
+                        columna -= (aux2 - 1);
+                        agregarToken(lexicotoken.Tipo.S_CADENA);
                         columna += (aux2 - 1);
                         columna += 1;
                         if (comprobadorletra == 0) { }

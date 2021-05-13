@@ -145,7 +145,7 @@ namespace VisualValley
                 case Tipo.Y_DERECHA:
                     return "<finstrucciones>";
                 case Tipo.S_CADENA:
-                    return "<cadena>";
+                    return "<scadena>";
                 case Tipo.S_TEXTO_SIMPLE:
                     return "<tsimple>";
                 case Tipo.S_IGUAL:

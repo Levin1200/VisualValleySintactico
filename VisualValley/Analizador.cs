@@ -401,7 +401,15 @@ namespace VisualValley
                             {
                                 goto case 59;
                             }
-                            else
+                            else if (lexaux == "verdadero")
+                            {
+                                goto case 61;
+                            }
+                            else if (lexaux == "falso")
+                            {
+                                goto case 62;
+                            }
+                        else
                             {
                                 goto case 60;
                             }
@@ -806,6 +814,26 @@ namespace VisualValley
                         aux2 = lexaux.Length;
                         columna -= (aux2 - 1);
                         agregarToken(lexicotoken.Tipo.IDENTIFICADOR);
+                        columna += (aux2 - 1);
+                        columna += 1;
+                        if (comprobadorletra == 0) { }
+                        else { comprobadorletra = 0; estado = 0; i -= 1; columna -= 1; }
+                        break;
+                    case 61:
+                        aux2 = 0;
+                        aux2 = lexaux.Length;
+                        columna -= (aux2 - 1);
+                        agregarToken(lexicotoken.Tipo.VERDADERO);
+                        columna += (aux2 - 1);
+                        columna += 1;
+                        if (comprobadorletra == 0) { }
+                        else { comprobadorletra = 0; estado = 0; i -= 1; columna -= 1; }
+                        break;
+                    case 62:
+                        aux2 = 0;
+                        aux2 = lexaux.Length;
+                        columna -= (aux2 - 1);
+                        agregarToken(lexicotoken.Tipo.FALSO);
                         columna += (aux2 - 1);
                         columna += 1;
                         if (comprobadorletra == 0) { }

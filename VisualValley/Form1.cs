@@ -239,12 +239,16 @@ namespace VisualValley
             label1.ForeColor = Color.White;
             label2.ForeColor = Color.White;
             label3.ForeColor = Color.White;
+            label4.ForeColor = Color.White;
             dataGridView1.BackgroundColor=Color.FromArgb(54, 54, 54);
             dataGridView1.ForeColor = Color.DodgerBlue;
             dataGridView1.DefaultCellStyle.BackColor=Color.FromArgb(54, 54, 54);
             dataGridView2.BackgroundColor = Color.FromArgb(54, 54, 54);
             dataGridView2.ForeColor = Color.White;
             dataGridView2.DefaultCellStyle.BackColor = Color.FromArgb(54, 54, 54);
+            dataGridView3.BackgroundColor = Color.FromArgb(54, 54, 54);
+            dataGridView3.ForeColor = Color.White;
+            dataGridView3.DefaultCellStyle.BackColor = Color.FromArgb(54, 54, 54);
             menuStrip1.BackColor= Color.FromArgb(31, 31, 31);
             menuStrip1.ForeColor = Color.DodgerBlue;
         }
@@ -261,12 +265,16 @@ namespace VisualValley
             label1.ForeColor = Color.Black;
             label2.ForeColor = Color.Black;
             label3.ForeColor = Color.Black;
+            label4.ForeColor = Color.White;
             dataGridView1.BackgroundColor = Color.White;
             dataGridView1.ForeColor = Color.Black;
             dataGridView1.DefaultCellStyle.BackColor = Color.White;
             dataGridView2.BackgroundColor = Color.White;
             dataGridView2.ForeColor = Color.Black;
             dataGridView2.DefaultCellStyle.BackColor = Color.White;
+            dataGridView3.BackgroundColor = Color.White;
+            dataGridView3.ForeColor = Color.Black;
+            dataGridView3.DefaultCellStyle.BackColor = Color.White;
             menuStrip1.BackColor = Color.White;
             menuStrip1.ForeColor = Color.Black;
         }
@@ -402,32 +410,52 @@ namespace VisualValley
         private void errortabla(int tipo, string dato, int line) {
             switch (tipo) {
                 case 1: {
-                        dataGridView2.Rows.Add("Error", "Dato"+"No puede colocar dos operadores juntos", line);
+                        dataGridView2.Rows.Add("Error", dato+" No puede colocar dos operadores juntos", line);
                         break;
                     }
                 case 2:
                     {
-                        dataGridView2.Rows.Add("Error", "Dato" + "Se espera un dato o identificador", line);
+                        dataGridView2.Rows.Add("Error", dato + " Se espera un dato o identificador", line);
                         break;
                     }
                 case 3:
                     {
-                        dataGridView2.Rows.Add("Error", "Dato" + "No puede colocar dos operadores juntos", line);
+                        dataGridView2.Rows.Add("Error", dato + " Se espera una apertura", line);
                         break;
                     }
                 case 4:
                     {
-                        dataGridView2.Rows.Add("Error", "Dato" + "No puede colocar dos operadores juntos", line);
+                        dataGridView2.Rows.Add("Error", dato + " El primer dato debe ser un entero, ide o par", line);
                         break;
                     }
                 case 5:
                     {
-                        dataGridView2.Rows.Add("Error", "Dato" + "No puede colocar dos operadores juntos", line);
+                        dataGridView2.Rows.Add("Error", dato + " No se puede colocar despues de parder", line);
                         break;
                     }
                 case 6:
                     {
-                        dataGridView2.Rows.Add("Error", "Dato" + "No puede colocar dos operadores juntos", line);
+                        dataGridView2.Rows.Add("Error", dato + " Se espera un operador", line);
+                        break;
+                    }
+                case 7:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " No puede colocar al abrir un parentesis", line);
+                        break;
+                    }
+                case 8:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " No se puede cerrar despues de un operador", line);
+                        break;
+                    }
+                case 9:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " Se esperaba un identificador", line);
+                        break;
+                    }
+                case 10:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " No puede colocar dos operadores juntos", line);
                         break;
                     }
                 default: {
@@ -485,30 +513,24 @@ namespace VisualValley
                         {
                             string pruebasintaxis="";
                             //Aqui encolamos
-                            Queue entero = new Queue();
-                            Queue parentesis = new Queue();
-                            bool parizt = false;
-                            int part = 0;
+                            Queue entero = new Queue(); Queue parentesis = new Queue();
+                            bool parizt = false; int part = 0;
                             string[] varentero = cadena.Split('<');
-                            foreach (var ve in varentero) {
-                                entero.Enqueue(ve);
-                            }
+                            foreach (var ve in varentero) { entero.Enqueue(ve); }
 
                             string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
                             daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
                             daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
-                            pruebasintaxis += daux1;//A;adimos a la cadena el identficador
+                            pruebasintaxis += "<"+daux1;//A;adimos a la cadena el identficador
                             if (daux1 == "ide>") // Verificamos si es un identificador
                             {
                                 daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
                                 pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
                                 if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
+                                { dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>"); }
+                                else if (daux1 == "igual>")
                                 {
-                                    dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                }
-                                else if (daux1=="igual>") {
-                                    int primeravez = 0;
-                                    bool factor = false, operador = false, pariz = false,parder=false ;
+                                    int primeravez = 0; bool factor = false, operador = false, pariz = false, parder = false;
                                     while (entero.Count > 0)
                                     {
                                         string daux2 = (string)entero.Dequeue();
@@ -516,143 +538,99 @@ namespace VisualValley
                                         //Verificamos si es un identifcador, un num entero o un operador
                                         if (daux2 == "ide>")
                                         {
-                                           
-                                                int estado=1;
-                                                if (pariz == true) { estado = 1;pariz = false; } else { estado = 1; }
-                                               
-                                                if (estado == 1) {
-                                                    primeravez = 1;
-                                                    if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
-                                                    else
-                                                    {
-                                                        if (factor == true)
-                                                        { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                            dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                        }
-                                                        else if (operador == true)
-                                                        {
-                                                            operador = false;
-                                                        }
-                                                    }
+
+                                            int estado = 1;
+                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+
+                                            if (estado == 1)
+                                            {
+                                                primeravez = 1;
+                                                if (parder == true) { errortabla(5, "Entero", linea); error = 1; break; }
+                                                else
+                                                {
+                                                    if (factor == true) { errortabla(6, "Entero", linea); error = 1; break; }
+                                                    else if (operador == true) { operador = false; }
                                                 }
+                                            }
                                             factor = true;
                                         }
                                         else if (daux2 == "nentero>")
                                         {
-                                           
-                                                int estado=1;
-                                                if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
-
-                                                if (estado == 1)
-                                                {
-                                                    primeravez = 1;
-                                                    if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
-                                                    else
-                                                    {
-                                                        if (factor == true)
-                                                        { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                            dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                        }
-                                                        else if (operador == true)
-                                                        {
-                                                            operador = false;
-                                                        }
-                                                    }
-                                                }
-                                            factor = true;
-                                        }
-                                        else if (daux2 == "parentesisa>")
-                                        {
-                                                pariz = true;
-                                                parizt = true;
-                                                part += 1;
+                                            int estado = 1;
+                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+                                            if (estado == 1)
+                                            {
                                                 primeravez = 1;
-                                        }
-                                        else if (primeravez == 0) {
-                                            dataGridView2.Rows.Add("Error", "El primer dato debe ser un entero, ide o par", linea); error = 1; break;
-                                        }
-                                        else if (daux2 == "parentesisc>")
-                                        {
-                                                if (parizt == true)
-                                                {//verifico si hay algun parentesis abierto
-                                                 //elimino el ultimo parentesis
-                                                    if (part > 0)
-                                                    {
-                                                        part -= 1;
-                                                        parder = true;
-                                                        pariz = false;
-
-                                                        if (part > 0) { } else { pariz = false; parizt = false; }
-                                                    }
-                                                }
+                                                if (parder == true) { errortabla(5, "Entero", linea); error = 1; break; }
                                                 else
                                                 {
-                                                    dataGridView2.Rows.Add("Error", "Se espera una apertura", linea); error = 1; break;
+                                                    if (factor == true) { errortabla(6, "Entero", linea); error = 1; break; }
+                                                    else if (operador == true) { operador = false; }
                                                 }
+                                            }
+                                            factor = true;
+                                        }
+                                        else if (daux2 == "parentesisa>") { pariz = true; parizt = true; part += 1; primeravez = 1; }
+                                        else if (primeravez == 0) { errortabla(4, "Entero", linea); error = 1; break; }
+                                        else if (daux2 == "parentesisc>")
+                                        {
+                                            if (parizt == true)
+                                            {//verifico si hay algun parentesis abierto
+                                             //elimino el ultimo parentesis
+                                                if (part > 0)
+                                                {
+                                                    part -= 1; parder = true; pariz = false; if (part > 0) { } else { pariz = false; parizt = false; }
+                                                }
+                                            }
+                                            else { errortabla(3, "Entero", linea); error = 1; break; }
                                         }
                                         else if (daux2 == "operador>")
                                         {
                                             if (parder == true)
                                             {
                                                 parder = false;
-
                                                 if (operador == true)
-                                                {
-
-                                                    errortabla(1, "Entero", linea); error = 1; break;
-                                                }
-                                                else if (factor == true)
-                                                {
-                                                    factor = false;
-                                                }
+                                                { errortabla(1, "Entero", linea); error = 1; break; }
+                                                else if (factor == true) { factor = false; }
                                             }
                                             else if (pariz == true)
-                                            { dataGridView2.Rows.Add("Error", "No puede colocar al abrir un parentesis", linea); error = 1; break; }
-                                            else {
+                                            { errortabla(7, "Entero", linea); error = 1; break; }
+                                            else
+                                            {
                                                 if (operador == true)
-                                                {
-                                                    dataGridView2.Rows.Add("Error", "No puede colocar dos operadores juntos", linea); error = 1; break;
-                                                }
+                                                { errortabla(1, "Entero", linea); error = 1; break; }
                                                 else if (factor == true)
-                                                {
-                                                    factor = false;
-                                                }
+                                                { factor = false; }
                                             }
-                                            if (operador == true) { dataGridView2.Rows.Add("Error", "No puede colocar dos operadores juntos", linea); error = 1; break; }
+                                            if (operador == true) { errortabla(1, "Entero", linea); error = 1; break; }
                                             operador = true;
-                                           
                                         }
+                                        //Si es un fin de linea se realiza lo siguiente
                                         else if (daux2 == "finlinea>")
                                         {
-                                            if (operador == true) { dataGridView2.Rows.Add("Error", "No se puede cerrar despues de un operador", linea); error = 1; break; }
+                                            if (operador == true) { errortabla(8, "Entero", linea); error = 1; break; }
                                             else if (factor == true)
                                             {
                                                 dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
                                                 Sintactico.Enqueue("<ventero>");
                                                 break;
                                             }
-                                            else if (parder == true) {
+                                            else if (parder == true)
+                                            {
                                                 dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
                                                 Sintactico.Enqueue("<ventero>");
                                                 break;
                                             }
-                                        }
+                                        } //Si no es ningun dato de los anteriores mandamos un error ya que no se reconoce el dato de la sintaxis
                                         else { dataGridView2.Rows.Add("Error", "Dato desconocido", linea); error = 1; break; }
-
                                     }
 
                                 }
+                                else { dataGridView2.Rows.Add("Error", "Se esperaba un signo igual o un fin de linea", linea); error = 1;}
                                 
                             }
-                            else {
-                                 dataGridView2.Rows.Add("Error", "Ventero Se esperaba un identificador", linea); error = 1; break; 
-                            }
-
-                            if (error == 1)
-                            {
-                                mensajeerror("Hay un error en la sintaxis entero", "Error");
-                                break;
-                            }
+                            else { errortabla(9, "Entero", linea); error = 1; break; }
+                            if (error == 1) { mensajeerror("Hay un error en la sintaxis entero", "Error"); break; }
                         }
 
 
@@ -707,11 +685,7 @@ namespace VisualValley
                                                     { //Si no es primera vez, verifico si esta activo el factor y doy error
                                                         dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
                                                     }
-                                                    else if (operador == true)
-                                                    {
-                                                        factor = true;
-                                                        operador = false;
-                                                    }
+                                                    else if (operador == true)  { factor = true; operador = false; }
                                                 }
 
 
@@ -735,18 +709,13 @@ namespace VisualValley
                                                         dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
                                                     }
                                                     else if (operador == true)
-                                                    {
-                                                        factor = true;
-                                                        operador = false;
+                                                    { factor = true; operador = false;
                                                     }
                                                 }
 
                                             }
                                         }
-                                        else if (daux2 == "parentesisa>")
-                                        {
-                                            pariz = true;
-                                        }
+                                        else if (daux2 == "parentesisa>") { pariz = true; }
                                         else if (daux2 == "parentesisc>")
                                         {
                                             if (pariz == true)

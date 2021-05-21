@@ -16,6 +16,7 @@ namespace VisualValley
         string posiciones;
         int aux2;
         int comprobadorletra=0;
+        bool cadena = false;
 
         public LinkedList<lexicotoken> escaner(String entrada){
             entrada = entrada + "#";
@@ -198,6 +199,7 @@ namespace VisualValley
                         else if (c.CompareTo('\"') == 0)
                         {
                             //COMENZAR CADENA
+                            cadena = true;
                             lexaux += c;
                             columna += 1;
                             agregarToken(lexicotoken.Tipo.S_COM);
@@ -232,6 +234,7 @@ namespace VisualValley
 
                         }
                         break;
+                        //Aqui ya no se toca
                     case 1:
                         if (char.IsDigit(c))
                         {

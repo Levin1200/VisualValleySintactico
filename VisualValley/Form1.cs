@@ -444,9 +444,13 @@ namespace VisualValley
 
                         if (cadena.StartsWith("<ventero>"))
                         {
+
                             string pruebasintaxis="";
                             //Aqui encolamos
                             Queue entero = new Queue();
+                            Queue parentesis = new Queue();
+                            bool parizt = false;
+                            int part = 0;
                             string[] varentero = cadena.Split('<');
                             foreach (var ve in varentero) {
                                 entero.Enqueue(ve);
@@ -476,64 +480,107 @@ namespace VisualValley
                                         if (daux2 == "ide>")
                                         {
                                             //Se verifica si es la primera vez
-                                            if (primeravez == 0)
-                                            {
-                                                factor = true; //Si es primer avez se activa el factor para esperar un operador
-                                                primeravez = 1; //Se activa primera vez
-                                            }
-                                            else
-                                            {
-                                                if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; } else {
-                                                    if (factor == true)
-                                                    { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                        dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                    }
-                                                    else if (operador == true)
-                                                    {
-                                                        factor = true;
-                                                        operador = false;
-                                                    }
+
+                                            if (pariz == true) {
+                                                pariz = false;
+                                                if (primeravez == 0)
+                                                {
+                                                    factor = true; //Si es primer avez se activa el factor para esperar un operador
+                                                    primeravez = 1; //Se activa primera vez
                                                 }
+                                                else
+                                                {
+                                                    if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
+                                                    else
+                                                    {
+                                                        if (factor == true)
+                                                        { //Si no es primera vez, verifico si esta activo el factor y doy error
+                                                            dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
+                                                        }
+                                                        else if (operador == true)
+                                                        {
+                                                            factor = true;
+                                                            operador = false;
+                                                        }
+                                                    }
 
 
 
-                                            }
+                                                }
+                                            } 
+
+                                           
                                         }
                                         else if (daux2 == "nentero>")
                                         {
-                                            if (primeravez == 0)
-                                            {
-                                                factor = true; //Si es primer avez se activa el factor para esperar un operador
-                                                primeravez = 1;//Se activa primera vez
-                                            }
-                                            else
-                                            {
-                                                if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
+                                            if (pariz == true) {
+                                                pariz = false;
+                                                if (primeravez == 0)
+                                                {
+                                                    factor = true; //Si es primer avez se activa el factor para esperar un operador
+                                                    primeravez = 1;//Se activa primera vez
+                                                }
                                                 else
                                                 {
-                                                    if (factor == true)
-                                                    { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                        dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                    }
-                                                    else if (operador == true)
+                                                    if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
+                                                    else
                                                     {
-                                                        factor = true;
-                                                        operador = false;
+                                                        if (factor == true)
+                                                        { //Si no es primera vez, verifico si esta activo el factor y doy error
+                                                            dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
+                                                        }
+                                                        else if (operador == true)
+                                                        {
+                                                            factor = true;
+                                                            operador = false;
+                                                        }
                                                     }
-                                                }
 
+                                                }
                                             }
+                                           
                                         } else if (daux2 == "parentesisa>") {
-                                            pariz = true;
+                                            if (primeravez == 0)
+                                            {
+                                                pariz = true;
+                                                parizt = true;
+                                                part += 1;
+                                                primeravez = 1;
+                                            }
+                                            else {
+                                                pariz = true;
+                                                parizt = true;
+                                                part += 1;
+                                            }
+                                           
                                         }
                                         else if (daux2 == "parentesisc>")
                                         {
-                                            if (pariz == true) {
-                                                parder = true;
-                                                pariz = false;
-                                            } else {
-                                                dataGridView2.Rows.Add("Error", "Se espera una apertura", linea); error = 1; break;
+
+
+                                            if (primeravez == 0)
+                                            {
+                                                dataGridView2.Rows.Add("Error", "Se esperaba un ide, entero o parder", linea); error = 1; break;
                                             }
+                                            else {
+                                                if (parizt == true)
+                                                {//verifico si hay algun parentesis abierto
+                                                 //elimino el ultimo parentesis
+                                                    if (part > 0)
+                                                    {
+                                                        part -= 1;
+                                                        parder = true;
+                                                        pariz = false;
+
+                                                        if (part > 0) { } else { pariz = false;  parizt = false;}
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    dataGridView2.Rows.Add("Error", "Se espera una apertura", linea); error = 1; break;
+                                                }
+                                            }
+                                           
                                         }
                                         else if (daux2 == "operador>")
                                         {
@@ -546,6 +593,7 @@ namespace VisualValley
                                                 if (parder == true)
                                                 {
                                                     parder = false;
+
                                                     if (operador == true)
                                                     {
                                                         dataGridView2.Rows.Add("Error", "No puede colocar dos operadores juntos", linea); error = 1; break;
@@ -555,6 +603,9 @@ namespace VisualValley
                                                         factor = false;
                                                         operador = true;
                                                     }
+                                                }
+                                                else if (pariz == true) {
+                                                    dataGridView2.Rows.Add("Error", "No puede colocar al abrir un parentesis", linea); error = 1; break;
                                                 }
 
 
@@ -594,6 +645,12 @@ namespace VisualValley
                                 MessageBox.Show("Hay un error en la sintaxis de entero");
                                 break;
                             }
+                            else {
+                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
+                                Sintactico.Enqueue("<ventero>");
+                            }
+
+                            MessageBox.Show(pruebasintaxis);
 
                         }
 
@@ -792,27 +849,169 @@ namespace VisualValley
                         //Booleano
                         if (cadena.StartsWith("<boleano>"))
                         {
-                            if (cadena.Equals("<boleano><ide><igual><verdadero><finlinea>") || cadena.Equals("<boleano><ide><igual><falso><finlinea>") || cadena.Equals("<boleano><ide><igual><nentero><finlinea>")|| cadena.Equals("<boleano><ide><finlinea>"))
-                            { dataGridView2.Rows.Add("Correcto", "Estructura Booleana", linea,indice); Sintactico.Enqueue("<boleano>"); }
+                            string pruebasintaxis = "";
+                            //Aqui encolamos
+                            Queue entero = new Queue();
+                            string[] varentero = cadena.Split('<');
+                            foreach (var ve in varentero)
+                            {
+                                entero.Enqueue(ve);
+                                MessageBox.Show(ve);
+                            }
+
+                            string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
+                            daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
+                            daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
+                            pruebasintaxis += daux1;//A;adimos a la cadena el identficador
+                            if (daux1 == "ide>") // Verificamos si es un identificador
+                            {
+                                daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
+                                pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
+                                if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
+                                {
+                                    dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
+                                }
+                                else if (daux1 == "igual>")
+                                {
+                                    int primeravez = 0;
+                                    bool factor = false, operador = false, pariz = false, parder = false;
+                                    while (entero.Count > 0)
+                                    {
+                                        string daux2 = (string)entero.Dequeue();
+                                        pruebasintaxis += daux2; // a;adimos a la cadena el factor u operador
+                                        //Verificamos si es un identifcador, un num entero o un operador
+                                        if (daux2 == "ide>")
+                                        {
+                                            //Se verifica si es la primera vez
+                                            if (primeravez == 0)
+                                            {
+                                                factor = true; //Si es primer avez se activa el factor para esperar un operador
+                                                primeravez = 1; //Se activa primera vez
+                                            }
+                                            else
+                                            {
+                                                if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
+                                                else
+                                                {
+                                                    if (factor == true)
+                                                    { //Si no es primera vez, verifico si esta activo el factor y doy error
+                                                        dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
+                                                    }
+                                                    else if (operador == true)
+                                                    {
+                                                        factor = true;
+                                                        operador = false;
+                                                    }
+                                                }
+
+
+
+                                            }
+                                        }
+                                        else if (daux2 == "nentero>")
+                                        {
+                                            if (primeravez == 0)
+                                            {
+                                                factor = true; //Si es primer avez se activa el factor para esperar un operador
+                                                primeravez = 1;//Se activa primera vez
+                                            }
+                                            else
+                                            {
+                                                if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
+                                                else
+                                                {
+                                                    if (factor == true)
+                                                    { //Si no es primera vez, verifico si esta activo el factor y doy error
+                                                        dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
+                                                    }
+                                                    else if (operador == true)
+                                                    {
+                                                        factor = true;
+                                                        operador = false;
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                        else if (daux2 == "parentesisa>")
+                                        {
+                                            pariz = true;
+                                        }
+                                        else if (daux2 == "parentesisc>")
+                                        {
+                                            if (pariz == true)
+                                            {
+                                                parder = true;
+                                                pariz = false;
+                                            }
+                                            else
+                                            {
+                                                dataGridView2.Rows.Add("Error", "Se espera una apertura", linea); error = 1; break;
+                                            }
+                                        }
+                                        else if (daux2 == "operador>")
+                                        {
+                                            if (primeravez == 0)
+                                            {
+                                                dataGridView2.Rows.Add("Error", "Se espera un numero o identificador", linea); error = 1; break;
+                                            }
+                                            else
+                                            {
+                                                if (parder == true)
+                                                {
+                                                    parder = false;
+                                                    if (operador == true)
+                                                    {
+                                                        dataGridView2.Rows.Add("Error", "No puede colocar dos operadores juntos", linea); error = 1; break;
+                                                    }
+                                                    else if (factor == true)
+                                                    {
+                                                        factor = false;
+                                                        operador = true;
+                                                    }
+                                                }
+
+
+                                            }
+                                        }
+                                        else if (daux2 == "finlinea>")
+                                        {
+                                            if (primeravez == 0)
+                                            {
+                                                dataGridView2.Rows.Add("Error", "No se puede cerrar despues de una igualdad", linea); error = 1; break;
+                                            }
+                                            else if (operador == true)
+                                            {
+                                                dataGridView2.Rows.Add("Error", "No se puede cerrar despues de un operador", linea); error = 1; break;
+                                            }
+                                            else if (factor == true)
+                                            {
+                                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
+                                                Sintactico.Enqueue("<ventero>");
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            dataGridView2.Rows.Add("Error", "Dato desconocido", linea); error = 1; break;
+                                        }
+
+                                    }
+
+                                }
+                            }
                             else
                             {
-                                error = 1;
-                                if (cadena.StartsWith("<bolneado><ide><igual>"))
-                                {
-                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaban un identificador", linea); error = 0; break; }
-                                    if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un identificador", linea); error = 0; break; }
-                                        if (!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un valor", linea); error = 0; break; }
-                                    if (!cadena.Contains("<parentesisc>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba fin de linea", linea); error = 0; break; }
-                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un operador", linea); error = 0; break; }
-                                }
-                                else
-                                {
-                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un identificador", linea); error = 0; break; }
-                                    if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba signo igual", linea); error = 0; break; }
-                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba fin de linea", linea); error = 0; break; }
-                                }
-                                if (error == 1) { dataGridView2.Rows.Add("Error", "Boleano Analisis detenido, se han especificado demasiados valores", linea); break; }
+                                dataGridView2.Rows.Add("Error", "Ventero Se esperaba un identificador", linea); error = 1; break;
                             }
+
+                            if (error == 1)
+                            {
+                                MessageBox.Show("Hay un error en la sintaxis de entero");
+                                break;
+                            }
+
+                            MessageBox.Show(pruebasintaxis);
                         }
 
 

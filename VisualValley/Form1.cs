@@ -36,9 +36,13 @@ namespace VisualValley
                 //Dev.Select(Dev.Text.Length, 0);
             }
         }
+        string micadena="";
         int error = 0, indice =1;  //Variable que maneja errores
         Stack especiales = new Stack(); //Pila que contiene los especiales desde el ultimo hasta el primero
         Queue Sintactico = new Queue();
+        Queue tsimbolos = new Queue();
+        Queue stipos = new Queue();
+        Queue sidentificador = new Queue();
         bool si = false, sino = false, cambiar = false, mientras = false, para = false, caso = false, hacer = false,inicios = false,fines = false; //Verifica si estan activos los especiales
         int tsi = 0, tsino = 0, tcambiar = 0, tmientras = 0, tpara = 0, tcaso = 0, thacer = 0, ecadena=0;
 
@@ -57,12 +61,12 @@ namespace VisualValley
 
         private void button3_Click(object sender, EventArgs e)
         {
-            semantico();
+            vd();
         }
 
         //CODIGO
         string codigo;
-
+        string simbolos;
 
         private void palabrasreservadas() {
             foreach (string element in PR)
@@ -253,6 +257,7 @@ namespace VisualValley
             dataGridView2.ForeColor = Color.White;
             dataGridView2.DefaultCellStyle.BackColor = Color.FromArgb(54, 54, 54);
             dataGridView3.BackgroundColor = Color.FromArgb(54, 54, 54);
+            dataGridView3.DefaultCellStyle.SelectionBackColor = Color.Crimson;
             dataGridView3.ForeColor = Color.White;
             dataGridView3.DefaultCellStyle.BackColor = Color.FromArgb(54, 54, 54);
             menuStrip1.BackColor= Color.FromArgb(31, 31, 31);
@@ -285,7 +290,98 @@ namespace VisualValley
             menuStrip1.ForeColor = Color.Black;
         }
 
-        private void semantico()
+        private void cargartabla() {
+            string path = @"codesemantico.txt";
+            string cadena = "";
+            if (!File.Exists(path))
+            {
+                //Si no existe
+            }
+            else
+            {
+                using (StreamReader ReaderObject = new StreamReader(path))
+                {
+                    while ((cadena = ReaderObject.ReadLine()) != null)
+                    {
+                        string[] nuevacadena = cadena.Split('~');
+                        foreach (var ve in nuevacadena) { tsimbolos.Enqueue(ve);}
+                    }
+                }
+            }
+
+         }
+
+        string[] sttipo = new string[100];
+        string[] stvar = new string[100];
+        //VERIFICAR VARIABLES DUPLICADAS
+
+        private void vd() {
+            int total = 0;
+            int totalt = 0;
+            while (total<= dataGridView1.Rows.Count-2) {
+                string vari = dataGridView1.Rows[total].Cells[0].Value.ToString();
+                vari = string.Concat(vari.Where(c => !char.IsWhiteSpace(c)));
+                if (vari=="<ventero>"|| vari == "<duplo>"|| vari == "<cadena>"|| vari == "<boleano>") {
+                    string vari2 = dataGridView1.Rows[total + 1].Cells[1].Value.ToString();
+                    vari2 = string.Concat(vari2.Where(c => !char.IsWhiteSpace(c)));
+                    //MessageBox.Show("variable encontrada id: " + vari2);
+                    if (vari == "<ventero>") {
+                        sttipo[totalt] = "<ventero>";
+                        stvar[totalt] = vari2;
+                    }
+                    if (vari == "<duplo>")
+                    {
+                        sttipo[totalt] = "<duplo>";
+                        stvar[totalt] = vari2;
+                    }
+                    if (vari == "<cadena>")
+                    {
+                        sttipo[totalt] = "<cadena>";
+                        stvar[totalt] = vari2;
+                    }
+                    if (vari == "<boleano>")
+                    {
+                        sttipo[totalt] = "<boleano>";
+                        stvar[totalt] = vari2;
+                    }
+                   
+
+                    totalt += 1;
+                }
+                
+                total += 1;
+            }
+            int var = 0;
+            dataGridView3.Rows.Clear();
+            for (int i = totalt-1; i >=0; i --) {
+                //MessageBox.Show(stvar[i] + " Posicion I " + i);
+                for (int m = 0; m < i; m++) {
+                    if (stvar[i] == stvar[m])
+                    {
+                        //MessageBox.Show(stvar[m] + " Posicion M " + m);
+                        MessageBox.Show("Problema encontrado, la variable ya existe");
+                        dataGridView3.Rows.Add("ERROR", " Identificador ya existe", "null");
+                        var = 1;
+                        break;
+                    }
+                   
+                }
+                if (var == 1) {
+                    break;
+                }
+                else
+                {
+                    dataGridView3.Rows.Add("" + sttipo[i], " Identificador correcto", "null");
+                }
+            }
+        
+        }
+        //VERIFICAR EXISTENCIA DE VARIABLES ANTERIORES
+        //VERIFICAR TIPOS DE VARIABLES
+        
+
+
+        private void tablasimbolos()
         {
             try
             {
@@ -400,7 +496,7 @@ namespace VisualValley
                         }
 
                     }
-                    analizarsemantico();
+                    
                 }
             }
             catch { MessageBox.Show("Algo ha sucedido"); }
@@ -625,12 +721,15 @@ namespace VisualValley
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            
+            button3.Enabled = false;
             especiales.Clear();
             error = 0;
             si = false; sino = false; cambiar = false; mientras = false; para = false; caso = false; hacer = false; inicios = false; fines = false; //Verifica si estan activos los especiales
             tsi = 0; tsino = 0; tcambiar = 0; tmientras = 0; tpara = 0; tcaso = 0; thacer = 0; ecadena = 0;
+            tablasimbolos();
+            cargartabla();
             sintactico();
+           
             
         }
 
@@ -649,6 +748,7 @@ namespace VisualValley
                     while ((cadena = ReaderObject.ReadLine()) != null)
                     {
                         linea += 1;
+                        micadena = "";
                         //MessageBox.Show(cadena);
                         //Nuevo codigo
                         //Inicio
@@ -670,19 +770,21 @@ namespace VisualValley
 
                         if (cadena.StartsWith("<ventero>"))
                         {
+                            //AQUI SE ENCOLA EL TIPO DE DATOS
                             string pruebasintaxis="";
                             //Aqui encolamos
                             Queue entero = new Queue(); Queue parentesis = new Queue();
                             bool parizt = false; int part = 0;
                             string[] varentero = cadena.Split('<');
                             foreach (var ve in varentero) { entero.Enqueue(ve); }
-
+                            
                             string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
                             daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
                             daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
                             pruebasintaxis += "<"+daux1;//A;adimos a la cadena el identficador
                             if (daux1 == "ide>") // Verificamos si es un identificador
                             {
+                                //AQUI SE ENCOLA EL IDENTIFICADOR
                                 daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
                                 pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
                                 if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
@@ -697,7 +799,8 @@ namespace VisualValley
                                         //Verificamos si es un identifcador, un num entero o un operador
                                         if (daux2 == "ide>")
                                         {
-
+                                            //AQUI ENCOLAMOS LOS DEMAS IDENTIFICADORES
+                                            cadena += "<"+daux2; //A LA CADENA SE LE AGREGAN LOS DATOS
                                             int estado = 1;
                                             if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
 
@@ -788,6 +891,7 @@ namespace VisualValley
                             }
                             else { errortabla(9, "Entero", linea); error = 1; break; }
                             if (error == 1) { mensajeerror("Hay un error en la sintaxis entero", "Error"); break; }
+                            string aux = (string)tsimbolos.Dequeue();
                         }
 
 
@@ -802,12 +906,17 @@ namespace VisualValley
                             foreach (var ve in vcadena) { cadenaa.Enqueue(ve); }
 
                             string daux1 = (string)cadenaa.Dequeue();//Recibimos el espacio en blanco
+                           // string aux = (string) tsimbolos.Dequeue();
                             daux1 = (string)cadenaa.Dequeue();// Recibimos entero pero ya no lo necesitamos
+                           // aux = (string)tsimbolos.Dequeue();
                             daux1 = (string)cadenaa.Dequeue();// Recibimos el segundo dato
+                           // aux = (string)tsimbolos.Dequeue();
                             pruebasintaxiss += "<" + daux1;//A;adimos a la cadena el identficador
                             if (daux1 == "ide>") // Verificamos si es un identificador
                             {
+                                //sidentificador.Enqueue(aux);
                                 daux1 = (string)cadenaa.Dequeue();// Recibimos el tercer dato
+                                //aux = (string)tsimbolos.Dequeue();
                                 pruebasintaxiss += daux1; //A;adirmos a la cadena el fin de linea o el igual
                                 if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
                                 { dataGridView2.Rows.Add("Correcto", "Estructura cadena", linea, indice); Sintactico.Enqueue("<cadena>"); }
@@ -817,6 +926,7 @@ namespace VisualValley
                                     while (cadenaa.Count > 0)
                                     {
                                         string daux2 = (string)cadenaa.Dequeue();
+                                        //aux = (string)tsimbolos.Dequeue();
                                         pruebasintaxiss += daux2; // a;adimos a la cadena el factor u operador
                                         //Verificamos si es un identifcador, un num entero o un operador
                                         if (daux2 == "ide>")
@@ -1017,6 +1127,7 @@ namespace VisualValley
                                 else { dataGridView2.Rows.Add("Error", "Se esperaba un signo igual o un fin de linea", linea); error = 1; }
                                 if (error == 1) { mensajeerror("Hay un error en la sintaxis Cadena", "Error"); break; }
                             }
+                            stipos.Enqueue("<entero>");
                         }
 
                         //Duplo
@@ -1028,14 +1139,18 @@ namespace VisualValley
                             bool parizt = false; int part = 0;
                             string[] varduplo = cadena.Split('<');
                             foreach (var ve in varduplo) { duplo.Enqueue(ve); }
-
+                            //string aux = (string)tsimbolos.Dequeue();
                             string daux1 = (string)duplo.Dequeue();//Recibimos el espacio en blanco
+                            //aux = (string)tsimbolos.Dequeue();
                             daux1 = (string)duplo.Dequeue();// Recibimos entero pero ya no lo necesitamos
+                            //aux = (string)tsimbolos.Dequeue();
                             daux1 = (string)duplo.Dequeue();// Recibimos el segundo dato
                             pruebasintaxisx += "<" + daux1;//A;adimos a la cadena el identficador
                             if (daux1 == "ide>") // Verificamos si es un identificador
                             {
+                                //sidentificador.Enqueue(aux);
                                 daux1 = (string)duplo.Dequeue();// Recibimos el tercer dato
+                                //aux = (string)tsimbolos.Dequeue();
                                 pruebasintaxisx += daux1; //A;adirmos a la cadena el fin de linea o el igual
                                 if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
                                 { dataGridView2.Rows.Add("Correcto", "Estructura Duplo", linea, indice); Sintactico.Enqueue("<duplo>"); }
@@ -1045,6 +1160,7 @@ namespace VisualValley
                                     while (duplo.Count > 0)
                                     {
                                         string daux2 = (string)duplo.Dequeue();
+                                        //aux = (string)tsimbolos.Dequeue();
                                         pruebasintaxisx += daux2; // a;adimos a la cadena el factor u operador
                                         //Verificamos si es un identifcador, un num entero o un operador
                                         if (daux2 == "ide>")

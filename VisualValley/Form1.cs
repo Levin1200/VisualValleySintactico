@@ -458,6 +458,11 @@ namespace VisualValley
                         dataGridView2.Rows.Add("Error", dato + " Se esperaba que se abriera la comilla", line);
                         break;
                     }
+                case 11:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " Combinacion incorrecta", line);
+                        break;
+                    }
                 default: {
 
                         break;
@@ -1330,6 +1335,7 @@ namespace VisualValley
                                         }
                                         else {
                                             comillaa = true;
+                                            comizt = true;
                                         }
                                       
                                     }
@@ -1359,6 +1365,16 @@ namespace VisualValley
                                         }
                                         else if (daux2 == "operador>")
                                         {
+                                        if (comizt == true) {
+                                            if (comillac == true)
+                                            {
+                                                comillac = false;
+                                            }
+                                            else {
+                                                errortabla(1, "Identificador", linea); error = 1; break;
+                                            }
+                                           
+                                        }
                                             if (parder == true)
                                             {
                                                 parder = false;

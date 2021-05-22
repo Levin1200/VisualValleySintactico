@@ -43,7 +43,8 @@ namespace VisualValley
         S_Y,
         S_NOT,
         S_TERMINA_LINEA,
-        S_COM,
+        S_COM, //comilla apertura
+        S_COMC, //comilla cierre
         S_COM_SIM,
         PALABRA,
         ERROR,
@@ -164,8 +165,10 @@ namespace VisualValley
                     return "<compuerta>";
                 case Tipo.S_TERMINA_LINEA:
                     return "<finlinea>";
-                case Tipo.S_COM:
-                    return "<comilla>";
+                case Tipo.S_COM:     //comillas apertura
+                    return "<comillaa>";
+                case Tipo.S_COMC:    //comillas cierre
+                    return "<comillac>";
                 case Tipo.S_COM_SIM:
                     return "<comillas>";
                 case Tipo.AUMENTADOR:

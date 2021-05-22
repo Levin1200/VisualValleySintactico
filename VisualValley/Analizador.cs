@@ -203,6 +203,7 @@ namespace VisualValley
                             lexaux += c;
                             columna += 1;
                             agregarToken(lexicotoken.Tipo.S_COM);
+                            estado = 4;
                            
                         }
                         else if (c.CompareTo('\'') == 0)
@@ -311,26 +312,56 @@ namespace VisualValley
                         break;
                         //OBTENGO UNA PALABRA
                     case 4:
-                        if (char.IsLetterOrDigit(c))
+                        if (cadena == true)
                         {
-                            estado = 4;
-                            lexaux += c;
-                            columna += 1;
+                            if (c.CompareTo('\"') == 0)
+                            {
+                                //GUARDAR CADENA
+                                aux2 = 0;
+                                aux2 = lexaux.Length;
+                                columna -= (aux2 - 1);
+                                agregarToken(lexicotoken.Tipo.S_CADENA);
+                                columna += (aux2 - 1);
+                                if (comprobadorletra == 0) { }
+                                else { comprobadorletra = 0; estado = 0; i -= 1; columna -= 1; }
+                                
+                                cadena = false;
+                                lexaux += c;
+                                columna += 1;
+                                agregarToken(lexicotoken.Tipo.S_COMC);//cierre de comilla
+                                estado = 0;
 
+                            }
+                            else {
+                                estado = 4;
+                                lexaux += c;
+                                columna += 1;
+                            }
                         }
-                        else if (char.IsWhiteSpace(c)|| i == entrada.Length - 1)
-                        {
-                            
-                            goto case 5;
-                            //columna += 1;
-                            //agregarToken(lexicotoken.Tipo.PALABRA);
+                        else {
+                            if (char.IsLetterOrDigit(c))
+                            {
+                                estado = 4;
+                                lexaux += c;
+                                columna += 1;
+
+                            }
+                            else if (char.IsWhiteSpace(c) || i == entrada.Length - 1)
+                            {
+
+                                goto case 5;
+                                //columna += 1;
+                                //agregarToken(lexicotoken.Tipo.PALABRA);
+                            }
+                            else
+                            {
+                                comprobadorletra = 1;
+                                goto case 5;
+                                //columna += 1;
+                            }
                         }
-                          else
-                        {
-                            comprobadorletra = 1;
-                            goto case 5;
-                            //columna += 1;
-                        }
+
+                       
                         break;
                     //PARTE DE CHUN
                     // CASE QUE VERIFICA LAS PALABRAS Y DEPENDIENDO CUAL SEA LO ENVIA A SU CASE CORRESPONDIENTE

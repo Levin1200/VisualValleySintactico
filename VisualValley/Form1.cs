@@ -54,6 +54,12 @@ namespace VisualValley
         String[] VR = { "entero", "duplo", "boleano", "cadena" };
         //SIGNOS
         String[] signos = {"-","+","*","/"};
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            semantico();
+        }
+
         //CODIGO
         string codigo;
 
@@ -279,6 +285,141 @@ namespace VisualValley
             menuStrip1.ForeColor = Color.Black;
         }
 
+        private void semantico()
+        {
+            try
+            {
+                int tokens = dataGridView1.Rows.Count - 1;
+                int posicion = 0;
+                string token = "";
+                int fila = 0;
+                int nuevafila = 0;
+                string cadena = "";
+                //Escritura del archivo de texto
+                string path = @"codesemantico.txt";
+                if (!File.Exists(path))
+                {
+
+                    // Si no existe crea el archivo
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        //Guardo la primera posicion de mi lectura
+                        try { fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString()); } catch { }
+
+                        //Guardo tambien la nueva fila con el mismo valor
+                        nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                        while (tokens > 0)
+                        {
+                            //Guardo el valor del token
+                            token = "~" + dataGridView1.Rows[posicion].Cells[1].Value;
+
+                            //Verifico si la fila actual es igual a la nueva fila
+                            if (fila == nuevafila)
+                            {
+                                //Si son las mismas guardo la cadena mas el token
+                                cadena = cadena + token;
+                            }
+                            else
+                            {
+                                //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                                cadena = token;
+                            }
+                            //Ahora mi fila antigua guarda el valor de la nueva fila
+                            fila = nuevafila;
+                            //Aumento la posicion
+                            posicion += 1;
+                            //Le digo que ya utiliza un token y que debe disminuir uno de ellos
+                            tokens -= 1;
+                            //Inicio el nuevo valor de la fila
+                            if (tokens > 0)
+                            {
+                                nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                            }
+                            else
+                            {
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                            }
+
+
+                        }
+
+                    }
+                    analizar();
+                }
+                else
+                {
+                    File.Delete(@"codesemantico.txt");
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        //Guardo la primera posicion de mi lectura
+                        try { fila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString()); } catch { }
+
+                        //Guardo tambien la nueva fila con el mismo valor
+                        nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+                        while (tokens > 0)
+                        {
+                            //Guardo el valor del token
+                            token = "~" + dataGridView1.Rows[posicion].Cells[1].Value;
+
+                            //Verifico si la fila actual es igual a la nueva fila
+                            if (fila == nuevafila)
+                            {
+                                //Si son las mismas guardo la cadena mas el token
+                                cadena = cadena + token;
+
+                            }
+                            else
+                            {
+                                //Si no son iguales escribo en el archivo y guardo el nuevo token en la cadena
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                                cadena = token;
+                            }
+                            //Ahora mi fila antigua guarda el valor de la nueva fila
+                            fila = nuevafila;
+                            //Aumento la posicion
+                            posicion += 1;
+                            //Le digo que ya utiliza un token y que debe disminuir uno de ellos
+                            tokens -= 1;
+                            //Inicio el nuevo valor de la fila
+                            if (tokens > 0)
+                            {
+                                nuevafila = int.Parse(dataGridView1.Rows[posicion].Cells[2].Value.ToString());
+
+                            }
+                            else
+                            {
+                                cadena = string.Concat(cadena.Where(c => !char.IsWhiteSpace(c)));
+                                sw.WriteLine(cadena);
+                            }
+
+
+                        }
+
+                    }
+                    analizarsemantico();
+                }
+            }
+            catch { MessageBox.Show("Algo ha sucedido"); }
+
+
+
+
+            //Guardo la posicion de la fila
+            //Si la fila es diferente termino de guardar en esa linea y asino la proxima linea
+            //Vuelvo al while
+
+        }
+
+        private void analizarsemantico() {
+            MessageBox.Show("Semantico");
+        }
+
+
+
         private void sintactico() {
             try
             {
@@ -407,6 +548,7 @@ namespace VisualValley
 
         }
 
+
         private void errortabla(int tipo, string dato, int line) {
             switch (tipo) {
                 case 1: {
@@ -463,6 +605,16 @@ namespace VisualValley
                         dataGridView2.Rows.Add("Error", dato + " Combinacion incorrecta", line);
                         break;
                     }
+                case 12:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " Despues de un cierre de cadena debe ir un operador o un punto y coma", line);
+                        break;
+                    }
+                case 13:
+                    {
+                        dataGridView2.Rows.Add("Error", dato + " Falta un fin de linea", line);
+                        break;
+                    }
                 default: {
 
                         break;
@@ -473,11 +625,13 @@ namespace VisualValley
 
         private void button2_Click_1(object sender, EventArgs e)
         {
+            
             especiales.Clear();
             error = 0;
             si = false; sino = false; cambiar = false; mientras = false; para = false; caso = false; hacer = false; inicios = false; fines = false; //Verifica si estan activos los especiales
             tsi = 0; tsino = 0; tcambiar = 0; tmientras = 0; tpara = 0; tcaso = 0; thacer = 0; ecadena = 0;
             sintactico();
+            
         }
 
         private void analizar() {
@@ -638,339 +792,260 @@ namespace VisualValley
 
 
                         //Cadena
-                         if (cadena.StartsWith("<cadena>"))
+                        if (cadena.StartsWith("<cadena>"))
                         {
-                            string pruebasintaxis = "";
+                            string pruebasintaxiss = "";
                             //Aqui encolamos
-                            Queue entero = new Queue(); Queue parentesis = new Queue();
-                            bool parizt = false; int part = 0;
-                            string[] varentero = cadena.Split('<');
-                            foreach (var ve in varentero) { entero.Enqueue(ve); }
+                            Queue cadenaa = new Queue(); Queue comillass = new Queue();
+                            bool comic = false; int comia = 0;
+                            string[] vcadena = cadena.Split('<');
+                            foreach (var ve in vcadena) { cadenaa.Enqueue(ve); }
 
-                            string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
-                            daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
-                            daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
-                            pruebasintaxis += "<" + daux1;//A;adimos a la cadena el identficador
+                            string daux1 = (string)cadenaa.Dequeue();//Recibimos el espacio en blanco
+                            daux1 = (string)cadenaa.Dequeue();// Recibimos entero pero ya no lo necesitamos
+                            daux1 = (string)cadenaa.Dequeue();// Recibimos el segundo dato
+                            pruebasintaxiss += "<" + daux1;//A;adimos a la cadena el identficador
                             if (daux1 == "ide>") // Verificamos si es un identificador
                             {
-                                daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
-                                pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
+                                daux1 = (string)cadenaa.Dequeue();// Recibimos el tercer dato
+                                pruebasintaxiss += daux1; //A;adirmos a la cadena el fin de linea o el igual
                                 if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
-                                { dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>"); }
+                                { dataGridView2.Rows.Add("Correcto", "Estructura cadena", linea, indice); Sintactico.Enqueue("<cadena>"); }
                                 else if (daux1 == "igual>")
                                 {
-                                    int primeravez = 0; bool factor = false, operador = false, pariz = false, parder = false;
-                                    while (entero.Count > 0)
+                                    int primeravez = 0; bool factor = false, operador = false, pariz = false, parder = false, comillaa = false, comillac = false;
+                                    while (cadenaa.Count > 0)
                                     {
-                                        string daux2 = (string)entero.Dequeue();
-                                        pruebasintaxis += daux2; // a;adimos a la cadena el factor u operador
+                                        string daux2 = (string)cadenaa.Dequeue();
+                                        pruebasintaxiss += daux2; // a;adimos a la cadena el factor u operador
                                         //Verificamos si es un identifcador, un num entero o un operador
                                         if (daux2 == "ide>")
                                         {
-
-                                            int estado = 1;
-                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
-
-                                            if (estado == 1)
+                                            if (comillac == false)
                                             {
-                                                primeravez = 1;
-                                                if (parder == true) { errortabla(5, "Entero", linea); error = 1; break; }
-                                                else
+                                                int estado = 1;
+                                                if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+
+                                                if (estado == 1)
                                                 {
-                                                    if (factor == true) { errortabla(6, "Entero", linea); error = 1; break; }
-                                                    else if (operador == true) { operador = false; }
+                                                    primeravez = 1;
+                                                    if (parder == true) { errortabla(5, "Cadena", linea); error = 1; break; }
+                                                    else
+                                                    {
+                                                        if (factor == true) { errortabla(6, "Cadena", linea); error = 1; break; }
+                                                        else if (operador == true) { operador = false; }
+                                                    }
                                                 }
+                                                factor = true;
                                             }
-                                            factor = true;
+                                            else
+                                            {
+                                                errortabla(12, "Cadena", linea); error = 1; break;
+                                            }
+
+                                        }
+                                        else if (daux2 == "scadena>")
+                                        {
+                                            if (comillac == false)
+                                            {
+                                                int estado = 1;
+                                                if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+
+                                                if (estado == 1)
+                                                {
+                                                    primeravez = 1;
+                                                    if (parder == true) { errortabla(5, "Cadena", linea); error = 1; break; }
+                                                    else
+                                                    {
+                                                        if (factor == true) { errortabla(6, "Cadena", linea); error = 1; break; }
+                                                        else if (operador == true) { operador = false; }
+                                                    }
+                                                }
+                                                factor = true;
+                                            }
+                                            else
+                                            {
+                                                errortabla(12, "Cadena", linea); error = 1; break;
+                                            }
+
                                         }
                                         else if (daux2 == "nentero>")
                                         {
-                                            int estado = 1;
-                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
-                                            if (estado == 1)
+                                            if (comillac == false)
                                             {
-                                                primeravez = 1;
-                                                if (parder == true) { errortabla(5, "Entero", linea); error = 1; break; }
-                                                else
+                                                int estado = 1;
+                                                if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+                                                if (estado == 1)
                                                 {
-                                                    if (factor == true) { errortabla(6, "Entero", linea); error = 1; break; }
-                                                    else if (operador == true) { operador = false; }
+                                                    primeravez = 1;
+                                                    if (parder == true) { errortabla(5, "Cadena", linea); error = 1; break; }
+                                                    else
+                                                    {
+                                                        if (factor == true) { errortabla(6, "Cadena", linea); error = 1; break; }
+                                                        else if (operador == true) { operador = false; }
+                                                    }
                                                 }
+                                                factor = true;
                                             }
-                                            factor = true;
+                                            else
+                                            {
+                                                errortabla(12, "Cadena", linea); error = 1; break;
+                                            }
+
                                         }
-                                        else if (daux2 == "parentesisa>") { pariz = true; parizt = true; part += 1; primeravez = 1; }
-                                        else if (primeravez == 0) { errortabla(4, "Entero", linea); error = 1; break; }
-                                        else if (daux2 == "parentesisc>")
+                                        else if (daux2 == "decimal>")
                                         {
-                                            if (parizt == true)
-                                            {//verifico si hay algun parentesis abierto
-                                             //elimino el ultimo parentesis
-                                                if (part > 0)
+                                            if (comillac == false)
+                                            {
+                                                int estado = 1;
+                                                if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+                                                if (estado == 1)
                                                 {
-                                                    part -= 1; parder = true; pariz = false; if (part > 0) { } else { pariz = false; parizt = false; }
+                                                    primeravez = 1;
+                                                    if (parder == true) { errortabla(5, "Cadena", linea); error = 1; break; }
+                                                    else
+                                                    {
+                                                        if (factor == true) { errortabla(6, "Cadena", linea); error = 1; break; }
+                                                        else if (operador == true) { operador = false; }
+                                                    }
                                                 }
+                                                factor = true;
                                             }
-                                            else { errortabla(3, "Entero", linea); error = 1; break; }
+                                            else
+                                            {
+                                                errortabla(12, "Cadena", linea); error = 1; break;
+                                            }
+
+                                        }
+                                        else if (daux2 == "parentesisa>" || daux2 == "comillaa>")
+                                        {
+                                            if (daux2 == "parentesisa>")
+                                            {
+                                                pariz = true; comic = true; comia += 1; primeravez = 1;
+                                            }
+                                            else
+                                            {
+                                                comillaa = true;
+                                                comic = true;
+                                                primeravez = 1;
+                                            }
+
+                                        }
+                                        else if (primeravez == 0) { errortabla(4, "Cadena", linea); error = 1; break; }
+                                        else if (daux2 == "parentesisc>" || daux2 == "comillac>")
+                                        {
+                                            if (daux2 == "parentecisc>")
+                                            {
+                                                if (comic == true)
+                                                {//verifico si hay algun parentesis abierto
+                                                 //elimino el ultimo parentesis
+                                                    if (comia > 0)
+                                                    {
+                                                        comia -= 1; parder = true; pariz = false; if (comia > 0) { } else { pariz = false; comic = false; }
+                                                    }
+                                                }
+                                                else { errortabla(3, "Cadena", linea); error = 1; break; }
+                                            }
+                                            else
+                                            {
+                                                if (comillaa == true)
+                                                {//verifico si hay algun parentesis abierto
+                                                 //elimino el ultimo parentesis
+                                                    comillaa = false;
+                                                    comillac = true;
+                                                }
+                                                else { errortabla(10, "Cadena", linea); error = 1; break; }
+                                            }
+
                                         }
                                         else if (daux2 == "operador>")
                                         {
+                                            if (comic == true)
+                                            {
+                                                if (comillac == true)
+                                                {
+                                                    comillac = false;
+                                                }
+                                                /*
+                                                else
+                                                {
+                                                    errortabla(11, "Identificador", linea); error = 1; break;
+                                                }*/
+
+                                            }
+
                                             if (parder == true)
                                             {
                                                 parder = false;
                                                 if (operador == true)
-                                                { errortabla(1, "Entero", linea); error = 1; break; }
+                                                { errortabla(1, "Cadena", linea); error = 1; break; }
                                                 else if (factor == true) { factor = false; }
                                             }
                                             else if (pariz == true)
-                                            { errortabla(7, "Entero", linea); error = 1; break; }
+                                            { errortabla(7, "Cadena", linea); error = 1; break; }
                                             else
                                             {
                                                 if (operador == true)
-                                                { errortabla(1, "Entero", linea); error = 1; break; }
+                                                { errortabla(1, "Cadena", linea); error = 1; break; }
                                                 else if (factor == true)
                                                 { factor = false; }
                                             }
-                                            if (operador == true) { errortabla(1, "Entero", linea); error = 1; break; }
+                                            if (operador == true) { errortabla(1, "Cadena", linea); error = 1; break; }
                                             operador = true;
+
                                         }
+
                                         //Si es un fin de linea se realiza lo siguiente
                                         else if (daux2 == "finlinea>")
                                         {
-                                            if (operador == true) { errortabla(8, "Entero", linea); error = 1; break; }
+                                            if (operador == true) { errortabla(8, "Cadena", linea); error = 1; break; }
                                             else if (factor == true)
                                             {
-                                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                                Sintactico.Enqueue("<ventero>");
+                                                dataGridView2.Rows.Add("Correcto", "Estructura Cadena", linea, indice); Sintactico.Enqueue("<cadena>");
                                                 break;
                                             }
                                             else if (parder == true)
                                             {
-                                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                                Sintactico.Enqueue("<ventero>");
+                                                dataGridView2.Rows.Add("Correcto", "Estructura Cadena", linea, indice); Sintactico.Enqueue("<cadena>");
                                                 break;
                                             }
                                         } //Si no es ningun dato de los anteriores mandamos un error ya que no se reconoce el dato de la sintaxis
-                                        else { dataGridView2.Rows.Add("Error", "Dato desconocido", linea); error = 1; break; }
+                                        else { dataGridView2.Rows.Add("Error", "Dato desconocido Cadena", linea); error = 1; break; }
                                     }
 
                                 }
                                 else { dataGridView2.Rows.Add("Error", "Se esperaba un signo igual o un fin de linea", linea); error = 1; }
-
-                            }
-                            else { errortabla(9, "Entero", linea); error = 1; break; }
-                            if (error == 1) { mensajeerror("Hay un error en la sintaxis entero", "Error"); break; }
-                        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        /*{
-                        string pruebasintaxis = "";
-                        //Aqui encolamos
-                        Queue entero = new Queue();
-                        string[] varentero = cadena.Split('<');
-                        foreach (var ve in varentero)
-                        {
-                            entero.Enqueue(ve);
-                            MessageBox.Show(ve);
-                        }
-
-                        string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
-                        daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
-                        daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
-                        pruebasintaxis += daux1;//A;adimos a la cadena el identficador
-                        if (daux1 == "ide>") // Verificamos si es un identificador
-                        {
-                            daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
-                            pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
-                            if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
-                            {
-                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                            }
-                            else if (daux1 == "igual>")
-                            {
-                                int primeravez = 0;
-                                bool factor = false, operador = false, pariz = false, parder = false;
-                                while (entero.Count > 0)
-                                {
-                                    string daux2 = (string)entero.Dequeue();
-                                    pruebasintaxis += daux2; // a;adimos a la cadena el factor u operador
-                                    //Verificamos si es un identifcador, un num entero o un operador
-                                    if (daux2 == "ide>")
-                                    {
-                                        //Se verifica si es la primera vez
-                                        if (primeravez == 0)
-                                        {
-                                            factor = true; //Si es primer avez se activa el factor para esperar un operador
-                                            primeravez = 1; //Se activa primera vez
-                                        }
-                                        else
-                                        {
-                                            if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
-                                            else
-                                            {
-                                                if (factor == true)
-                                                { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                    dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                }
-                                                else if (operador == true)  { factor = true; operador = false; }
-                                            }
-
-
-
-                                        }
-                                    }
-                                    else if (daux2 == "nentero>")
-                                    {
-                                        if (primeravez == 0)
-                                        {
-                                            factor = true; //Si es primer avez se activa el factor para esperar un operador
-                                            primeravez = 1;//Se activa primera vez
-                                        }
-                                        else
-                                        {
-                                            if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
-                                            else
-                                            {
-                                                if (factor == true)
-                                                { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                    dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                }
-                                                else if (operador == true)
-                                                { factor = true; operador = false;
-                                                }
-                                            }
-
-                                        }
-                                    }
-                                    else if (daux2 == "parentesisa>") { pariz = true; }
-                                    else if (daux2 == "parentesisc>")
-                                    {
-                                        if (pariz == true)
-                                        {
-                                            parder = true;
-                                            pariz = false;
-                                        }
-                                        else
-                                        {
-                                            dataGridView2.Rows.Add("Error", "Se espera una apertura", linea); error = 1; break;
-                                        }
-                                    }
-                                    else if (daux2 == "operador>")
-                                    {
-                                        if (primeravez == 0)
-                                        {
-                                            dataGridView2.Rows.Add("Error", "Se espera un numero o identificador", linea); error = 1; break;
-                                        }
-                                        else
-                                        {
-                                            if (parder == true)
-                                            {
-                                                parder = false;
-                                                if (operador == true)
-                                                {
-                                                    errortabla(1, "Entero", linea);
-                                                    dataGridView2.Rows.Add("Error", "No puede colocar dos operadores juntos", linea); error = 1; break;
-                                                }
-                                                else if (factor == true)
-                                                {
-                                                    factor = false;
-                                                    operador = true;
-                                                }
-                                            }
-
-
-                                        }
-                                    }
-                                    else if (daux2 == "finlinea>")
-                                    {
-                                        if (primeravez == 0)
-                                        {
-                                            dataGridView2.Rows.Add("Error", "No se puede cerrar despues de una igualdad", linea); error = 1; break;
-                                        }
-                                        else if (operador == true)
-                                        {
-                                            dataGridView2.Rows.Add("Error", "No se puede cerrar despues de un operador", linea); error = 1; break;
-                                        }
-                                        else if (factor == true)
-                                        {
-                                            dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                            Sintactico.Enqueue("<ventero>");
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        dataGridView2.Rows.Add("Error", "Dato desconocido", linea); error = 1; break;
-                                    }
-
-                                }
-
+                                if (error == 1) { mensajeerror("Hay un error en la sintaxis Cadena", "Error"); break; }
                             }
                         }
-                        else
-                        {
-                            dataGridView2.Rows.Add("Error", "Ventero Se esperaba un identificador", linea); error = 1; break;
-                        }
 
-                        if (error == 1)
-                        {
-                            MessageBox.Show("Hay un error en la sintaxis de entero");
-                            break;
-                        }
-
-                    }
-
-                        */
                         //Duplo
                         if (cadena.StartsWith("<duplo>"))
                         {
-                            string pruebasintaxis = "";
+                            string pruebasintaxisx = "";
                             //Aqui encolamos
-                            Queue entero = new Queue(); Queue parentesis = new Queue();
+                            Queue duplo = new Queue(); Queue parentesis = new Queue();
                             bool parizt = false; int part = 0;
-                            string[] varentero = cadena.Split('<');
-                            foreach (var ve in varentero) { entero.Enqueue(ve); }
+                            string[] varduplo = cadena.Split('<');
+                            foreach (var ve in varduplo) { duplo.Enqueue(ve); }
 
-                            string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
-                            daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
-                            daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
-                            pruebasintaxis += "<" + daux1;//A;adimos a la cadena el identficador
+                            string daux1 = (string)duplo.Dequeue();//Recibimos el espacio en blanco
+                            daux1 = (string)duplo.Dequeue();// Recibimos entero pero ya no lo necesitamos
+                            daux1 = (string)duplo.Dequeue();// Recibimos el segundo dato
+                            pruebasintaxisx += "<" + daux1;//A;adimos a la cadena el identficador
                             if (daux1 == "ide>") // Verificamos si es un identificador
                             {
-                                daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
-                                pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
+                                daux1 = (string)duplo.Dequeue();// Recibimos el tercer dato
+                                pruebasintaxisx += daux1; //A;adirmos a la cadena el fin de linea o el igual
                                 if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
-                                { dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>"); }
+                                { dataGridView2.Rows.Add("Correcto", "Estructura Duplo", linea, indice); Sintactico.Enqueue("<duplo>"); }
                                 else if (daux1 == "igual>")
                                 {
                                     int primeravez = 0; bool factor = false, operador = false, pariz = false, parder = false;
-                                    while (entero.Count > 0)
+                                    while (duplo.Count > 0)
                                     {
-                                        string daux2 = (string)entero.Dequeue();
-                                        pruebasintaxis += daux2; // a;adimos a la cadena el factor u operador
+                                        string daux2 = (string)duplo.Dequeue();
+                                        pruebasintaxisx += daux2; // a;adimos a la cadena el factor u operador
                                         //Verificamos si es un identifcador, un num entero o un operador
                                         if (daux2 == "ide>")
                                         {
@@ -981,10 +1056,10 @@ namespace VisualValley
                                             if (estado == 1)
                                             {
                                                 primeravez = 1;
-                                                if (parder == true) { errortabla(5, "Entero", linea); error = 1; break; }
+                                                if (parder == true) { errortabla(5, "Duplo", linea); error = 1; break; }
                                                 else
                                                 {
-                                                    if (factor == true) { errortabla(6, "Entero", linea); error = 1; break; }
+                                                    if (factor == true) { errortabla(6, "Duplo", linea); error = 1; break; }
                                                     else if (operador == true) { operador = false; }
                                                 }
                                             }
@@ -997,17 +1072,33 @@ namespace VisualValley
                                             if (estado == 1)
                                             {
                                                 primeravez = 1;
-                                                if (parder == true) { errortabla(5, "Entero", linea); error = 1; break; }
+                                                if (parder == true) { errortabla(5, "Duplo", linea); error = 1; break; }
                                                 else
                                                 {
-                                                    if (factor == true) { errortabla(6, "Entero", linea); error = 1; break; }
+                                                    if (factor == true) { errortabla(6, "Duplo", linea); error = 1; break; }
+                                                    else if (operador == true) { operador = false; }
+                                                }
+                                            }
+                                            factor = true;
+                                        }
+                                        else if (daux2 == "decimal>")
+                                        {
+                                            int estado = 1;
+                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+                                            if (estado == 1)
+                                            {
+                                                primeravez = 1;
+                                                if (parder == true) { errortabla(5, "Duplo", linea); error = 1; break; }
+                                                else
+                                                {
+                                                    if (factor == true) { errortabla(6, "Duplo", linea); error = 1; break; }
                                                     else if (operador == true) { operador = false; }
                                                 }
                                             }
                                             factor = true;
                                         }
                                         else if (daux2 == "parentesisa>") { pariz = true; parizt = true; part += 1; primeravez = 1; }
-                                        else if (primeravez == 0) { errortabla(4, "Entero", linea); error = 1; break; }
+                                        else if (primeravez == 0) { errortabla(4, "Duplo", linea); error = 1; break; }
                                         else if (daux2 == "parentesisc>")
                                         {
                                             if (parizt == true)
@@ -1018,7 +1109,7 @@ namespace VisualValley
                                                     part -= 1; parder = true; pariz = false; if (part > 0) { } else { pariz = false; parizt = false; }
                                                 }
                                             }
-                                            else { errortabla(3, "Entero", linea); error = 1; break; }
+                                            else { errortabla(3, "Duplo", linea); error = 1; break; }
                                         }
                                         else if (daux2 == "operador>")
                                         {
@@ -1026,35 +1117,35 @@ namespace VisualValley
                                             {
                                                 parder = false;
                                                 if (operador == true)
-                                                { errortabla(1, "Entero", linea); error = 1; break; }
+                                                { errortabla(1, "Duplo", linea); error = 1; break; }
                                                 else if (factor == true) { factor = false; }
                                             }
                                             else if (pariz == true)
-                                            { errortabla(7, "Entero", linea); error = 1; break; }
+                                            { errortabla(7, "Duplo", linea); error = 1; break; }
                                             else
                                             {
                                                 if (operador == true)
-                                                { errortabla(1, "Entero", linea); error = 1; break; }
+                                                { errortabla(1, "Duplo", linea); error = 1; break; }
                                                 else if (factor == true)
                                                 { factor = false; }
                                             }
-                                            if (operador == true) { errortabla(1, "Entero", linea); error = 1; break; }
+                                            if (operador == true) { errortabla(1, "Duplo", linea); error = 1; break; }
                                             operador = true;
                                         }
                                         //Si es un fin de linea se realiza lo siguiente
                                         else if (daux2 == "finlinea>")
                                         {
-                                            if (operador == true) { errortabla(8, "Entero", linea); error = 1; break; }
+                                            if (operador == true) { errortabla(8, "Duplo", linea); error = 1; break; }
                                             else if (factor == true)
                                             {
-                                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                                Sintactico.Enqueue("<ventero>");
+                                                dataGridView2.Rows.Add("Correcto", "Estructura Duplo", linea, indice); Sintactico.Enqueue("<duplo>");
+                                                Sintactico.Enqueue("<duplo>");
                                                 break;
                                             }
                                             else if (parder == true)
                                             {
-                                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                                Sintactico.Enqueue("<ventero>");
+                                                dataGridView2.Rows.Add("Correcto", "Estructura Duplo", linea, indice); Sintactico.Enqueue("<duplo>");
+                                                Sintactico.Enqueue("<duplo>");
                                                 break;
                                             }
                                         } //Si no es ningun dato de los anteriores mandamos un error ya que no se reconoce el dato de la sintaxis
@@ -1065,203 +1156,35 @@ namespace VisualValley
                                 else { dataGridView2.Rows.Add("Error", "Se esperaba un signo igual o un fin de linea", linea); error = 1; }
 
                             }
-                            else { errortabla(9, "Entero", linea); error = 1; break; }
-                            if (error == 1) { mensajeerror("Hay un error en la sintaxis entero", "Error"); break; }
-                        
-
-
-
-
-
-
-
-
-                        /* if (cadena.Equals("<duplo><ide><finlinea>") || cadena.Equals("<duplo><ide><igual><decimal><finlinealinea>") || cadena.Equals("<duplo><ide><igual><nentero><finlinealinea>") || cadena.Equals("<duplo><ide><igual><nentero><operador><nentero><finlinea>") || cadena.Equals("<duplo><ide><igual><ide><operador><ide><finlinea>") || cadena.Equals("<duplo><ide><igual><decimal><finlinea>") || cadena.Equals("<duplo><ide><igual><ide><finlinea>"))
-                         { dataGridView2.Rows.Add("Correcto", "Estructura correcta en la linea", linea,indice); Sintactico.Enqueue("<duplo>"); }
-                         else
-                         {
-                             error = 1;
-                             if (cadena.StartsWith("<duplo><ide><igual>"))
-                             {
-                                 if (!cadena.Contains("<duplo>")) { dataGridView2.Rows.Add("Error", "Duplo Se esperaba un valor", linea); error = 0; break; }
-                                 if (!cadena.Contains("<finliena>")) { dataGridView2.Rows.Add("Error", "Duplo Se esperaba fin de linea", linea); error = 0; break; }
-                             }
-                             else
-                             {
-                                 if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Duplo Se esperaba un identificador", linea); error = 0; break; }
-                                 if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "DuploSe esperaba un igual", linea); error = 0; }
-                                 if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "DuploSe esperaba fin de linea", linea); error = 0; break; }
-                             }
-                             if (error == 1) { dataGridView2.Rows.Add("Error", "Duplo Analisis detenido, se han especificado demasiados valores", linea); break; }
-                         }*/
-                    }
+                            else { errortabla(9, "Duplo", linea); error = 1; break; }
+                            if (error == 1) { mensajeerror("Hay un error en la sintaxis duplo", "Error"); break; }
+                        }
 
                         //Booleano
                         if (cadena.StartsWith("<boleano>"))
                         {
-                            string pruebasintaxis = "";
-                            //Aqui encolamos
-                            Queue entero = new Queue();
-                            string[] varentero = cadena.Split('<');
-                            foreach (var ve in varentero)
-                            {
-                                entero.Enqueue(ve);
-                                MessageBox.Show(ve);
-                            }
-
-                            string daux1 = (string)entero.Dequeue();//Recibimos el espacio en blanco
-                            daux1 = (string)entero.Dequeue();// Recibimos entero pero ya no lo necesitamos
-                            daux1 = (string)entero.Dequeue();// Recibimos el segundo dato
-                            pruebasintaxis += daux1;//A;adimos a la cadena el identficador
-                            if (daux1 == "ide>") // Verificamos si es un identificador
-                            {
-                                daux1 = (string)entero.Dequeue();// Recibimos el tercer dato
-                                pruebasintaxis += daux1; //A;adirmos a la cadena el fin de linea o el igual
-                                if (daux1 == "finlinea>") // Verificamos si es un fin de linea o un signo igual
-                                {
-                                    dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                }
-                                else if (daux1 == "igual>")
-                                {
-                                    int primeravez = 0;
-                                    bool factor = false, operador = false, pariz = false, parder = false;
-                                    while (entero.Count > 0)
-                                    {
-                                        string daux2 = (string)entero.Dequeue();
-                                        pruebasintaxis += daux2; // a;adimos a la cadena el factor u operador
-                                        //Verificamos si es un identifcador, un num entero o un operador
-                                        if (daux2 == "ide>")
-                                        {
-                                            //Se verifica si es la primera vez
-                                            if (primeravez == 0)
-                                            {
-                                                factor = true; //Si es primer avez se activa el factor para esperar un operador
-                                                primeravez = 1; //Se activa primera vez
-                                            }
-                                            else
-                                            {
-                                                if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
-                                                else
-                                                {
-                                                    if (factor == true)
-                                                    { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                        dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                    }
-                                                    else if (operador == true)
-                                                    {
-                                                        factor = true;
-                                                        operador = false;
-                                                    }
-                                                }
-
-
-
-                                            }
-                                        }
-                                        else if (daux2 == "nentero>")
-                                        {
-                                            if (primeravez == 0)
-                                            {
-                                                factor = true; //Si es primer avez se activa el factor para esperar un operador
-                                                primeravez = 1;//Se activa primera vez
-                                            }
-                                            else
-                                            {
-                                                if (parder == true) { dataGridView2.Rows.Add("Error", "No se puede colocar despues de parder", linea); error = 1; break; }
-                                                else
-                                                {
-                                                    if (factor == true)
-                                                    { //Si no es primera vez, verifico si esta activo el factor y doy error
-                                                        dataGridView2.Rows.Add("Error", "Se espera un operador", linea); error = 1; break;
-                                                    }
-                                                    else if (operador == true)
-                                                    {
-                                                        factor = true;
-                                                        operador = false;
-                                                    }
-                                                }
-
-                                            }
-                                        }
-                                        else if (daux2 == "parentesisa>")
-                                        {
-                                            pariz = true;
-                                        }
-                                        else if (daux2 == "parentesisc>")
-                                        {
-                                            if (pariz == true)
-                                            {
-                                                parder = true;
-                                                pariz = false;
-                                            }
-                                            else
-                                            {
-                                                dataGridView2.Rows.Add("Error", "Se espera una apertura", linea); error = 1; break;
-                                            }
-                                        }
-                                        else if (daux2 == "operador>")
-                                        {
-                                            if (primeravez == 0)
-                                            {
-                                                dataGridView2.Rows.Add("Error", "Se espera un dato o identificador", linea); error = 1; break;
-                                            }
-                                            else
-                                            {
-                                                if (parder == true)
-                                                {
-                                                    parder = false;
-                                                    if (operador == true)
-                                                    {
-                                                        errortabla(1, "Entero", linea); error = 1; break;
-                                                    }
-                                                    else if (factor == true)
-                                                    {
-                                                        factor = false;
-                                                        operador = true;
-                                                    }
-                                                }
-
-
-                                            }
-                                        }
-                                        else if (daux2 == "finlinea>")
-                                        {
-                                            if (primeravez == 0)
-                                            {
-                                                dataGridView2.Rows.Add("Error", "No se puede cerrar despues de una igualdad", linea); error = 1; break;
-                                            }
-                                            else if (operador == true)
-                                            {
-                                                dataGridView2.Rows.Add("Error", "No se puede cerrar despues de un operador", linea); error = 1; break;
-                                            }
-                                            else if (factor == true)
-                                            {
-                                                dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
-                                                Sintactico.Enqueue("<ventero>");
-                                                break;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            dataGridView2.Rows.Add("Error", "Dato desconocido", linea); error = 1; break;
-                                        }
-
-                                    }
-
-                                }
-                            }
+                            if (cadena.Equals("<boleano><ide><igual><verdadero><finlinea>") || cadena.Equals("<boleano><ide><igual><falso><finlinea>") || cadena.Equals("<boleano><ide><igual><nentero><finlinea>") || cadena.Equals("<boleano><ide><finlinea>"))
+                            { dataGridView2.Rows.Add("Correcto", "Estructura Booleana", linea, indice); Sintactico.Enqueue("<boleano>"); }
                             else
                             {
-                                dataGridView2.Rows.Add("Error", "Ventero Se esperaba un identificador", linea); error = 1; break;
+                                error = 1;
+                                if (cadena.StartsWith("<bolneado><ide><igual>"))
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaban un identificador", linea); error = 0; break; }
+                                    if (!cadena.Contains("<parentesisa>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un identificador", linea); error = 0; break; }
+                                    if (!cadena.Contains("<nentero>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un valor", linea); error = 0; break; }
+                                    if (!cadena.Contains("<parentesisc>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba fin de linea", linea); error = 0; break; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un operador", linea); error = 0; break; }
+                                    dataGridView2.Rows.Add("Correcto", "Estructura Entero", linea, indice); Sintactico.Enqueue("<ventero>");
+                                }
+                                else
+                                {
+                                    if (!cadena.Contains("<ide>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba un identificador", linea); error = 0; break; }
+                                    if (!cadena.Contains("<igual>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba signo igual", linea); error = 0; break; }
+                                    if (!cadena.Contains("<finlinea>")) { dataGridView2.Rows.Add("Error", "Boleano Se esperaba fin de linea", linea); error = 0; break; }
+                                }
+                                if (error == 1) { dataGridView2.Rows.Add("Error", "Boleano Analisis detenido, se han especificado demasiados valores", linea); break; }
                             }
-
-                            if (error == 1)
-                            {
-                                MessageBox.Show("Hay un error en la sintaxis de entero");
-                                break;
-                            }
-
-                            MessageBox.Show(pruebasintaxis);
                         }
 
 
@@ -1272,6 +1195,7 @@ namespace VisualValley
 
                         if (cadena.StartsWith("<ide>"))
                         {
+                            bool finl = false;
                             string pruebasintaxis = "";
                             //Aqui encolamos
                             Queue identificador = new Queue(); Queue parentesis = new Queue();
@@ -1293,9 +1217,10 @@ namespace VisualValley
                                         string daux2 = (string)identificador.Dequeue();
                                         pruebasintaxis += daux2; // a;adimos a la cadena el factor u operador
                                         //Verificamos si es un identifcador, un num entero o un operador
-                                        if (daux2 == "ide>")
+                                        if (daux2 == "ide>"||daux2 == "verdadero>"||daux2 == "falso>")
                                         {
-
+                                        if (comillac == false)
+                                        {
                                             int estado = 1;
                                             if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
 
@@ -1311,7 +1236,60 @@ namespace VisualValley
                                             }
                                             factor = true;
                                         }
-                                        else if (daux2 == "nentero>")
+                                        else {
+                                            errortabla(12, "Identificador", linea); error = 1; break;
+                                        }
+                                            
+                                        }
+                                    else if (daux2 == "scadena>")
+                                    {
+                                        if (comillac == false)
+                                        {
+                                            int estado = 1;
+                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+
+                                            if (estado == 1)
+                                            {
+                                                primeravez = 1;
+                                                if (parder == true) { errortabla(5, "Identificador", linea); error = 1; break; }
+                                                else
+                                                {
+                                                    if (factor == true) { errortabla(6, "Identificador", linea); error = 1; break; }
+                                                    else if (operador == true) { operador = false; }
+                                                }
+                                            }
+                                            factor = true;
+                                        }
+                                        else
+                                        {
+                                            errortabla(12, "Identificador", linea); error = 1; break;
+                                        }
+
+                                    }
+                                    else if (daux2 == "nentero>")
+                                        {
+                                        if (comillac == false) {
+                                            int estado = 1;
+                                            if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
+                                            if (estado == 1)
+                                            {
+                                                primeravez = 1;
+                                                if (parder == true) { errortabla(5, "Identificador", linea); error = 1; break; }
+                                                else
+                                                {
+                                                    if (factor == true) { errortabla(6, "Identificador", linea); error = 1; break; }
+                                                    else if (operador == true) { operador = false; }
+                                                }
+                                            }
+                                            factor = true;
+                                        } else {
+                                            errortabla(12, "Identificador", linea); error = 1; break;
+                                        }
+                                           
+                                        }
+                                    else if (daux2 == "decimal>")
+                                    {
+                                        if (comillac == false)
                                         {
                                             int estado = 1;
                                             if (pariz == true) { estado = 1; pariz = false; } else { estado = 1; }
@@ -1327,7 +1305,13 @@ namespace VisualValley
                                             }
                                             factor = true;
                                         }
-                                        else if (daux2 == "parentesisa>"|| daux2 == "comillaa>") 
+                                        else
+                                        {
+                                            errortabla(12, "Identificador", linea); error = 1; break;
+                                        }
+
+                                    }
+                                    else if (daux2 == "parentesisa>"|| daux2 == "comillaa>") 
                                     {
                                         if (daux2 == "parentesisa>")
                                         {
@@ -1336,6 +1320,7 @@ namespace VisualValley
                                         else {
                                             comillaa = true;
                                             comizt = true;
+                                            primeravez = 1;
                                         }
                                       
                                     }
@@ -1365,16 +1350,20 @@ namespace VisualValley
                                         }
                                         else if (daux2 == "operador>")
                                         {
-                                        if (comizt == true) {
+                                        if (comizt == true)
+                                        {
                                             if (comillac == true)
                                             {
                                                 comillac = false;
                                             }
-                                            else {
-                                                errortabla(1, "Identificador", linea); error = 1; break;
-                                            }
-                                           
+                                            /*
+                                            else
+                                            {
+                                                errortabla(11, "Identificador", linea); error = 1; break;
+                                            }*/
+
                                         }
+                                        
                                             if (parder == true)
                                             {
                                                 parder = false;
@@ -1393,7 +1382,9 @@ namespace VisualValley
                                             }
                                             if (operador == true) { errortabla(1, "Identificador", linea); error = 1; break; }
                                             operador = true;
+                                            
                                         }
+
                                         //Si es un fin de linea se realiza lo siguiente
                                         else if (daux2 == "finlinea>")
                                         {
@@ -1401,12 +1392,14 @@ namespace VisualValley
                                             else if (factor == true)
                                             {
                                                 dataGridView2.Rows.Add("Correcto", "Estructura Identificador", linea, indice); Sintactico.Enqueue("<ide>");
+                                            finl = true;
                                                 break;
                                             }
                                             else if (parder == true)
                                             {
                                                 dataGridView2.Rows.Add("Correcto", "Estructura Identificador", linea, indice); Sintactico.Enqueue("<ide>");
-                                                break;
+                                            finl = true;
+                                            break;
                                             }
                                         } //Si no es ningun dato de los anteriores mandamos un error ya que no se reconoce el dato de la sintaxis
                                         else { dataGridView2.Rows.Add("Error", "Dato desconocido Identificador", linea); error = 1; break; }
@@ -1414,7 +1407,10 @@ namespace VisualValley
 
                                 }
                                 else { dataGridView2.Rows.Add("Error", "Se esperaba un signo igual o un fin de linea", linea); error = 1; }
+                            if (finl == false) { errortabla(13, "Identificador", linea); error = 1; mensajeerror("Falta un final de linea Identificador", "Error"); break; }
                             if (error == 1) { mensajeerror("Hay un error en la sintaxis Identificador", "Error"); break; }
+                           
+                           
                         }
 
                         //Si
@@ -1630,7 +1626,8 @@ namespace VisualValley
                     if (fines==true) { } else { dataGridView2.Rows.Add("Error", "Se debe finalizar"); error = 1;fines = true;  }
                 }
             }
-                
+            if (error == 0) { button3.Enabled = true; } else { mensajeerror("No se puede analizar semanticamente, hay uno o mas errores", "Error"); }
         }
+        
     }
 }

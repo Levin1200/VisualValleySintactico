@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Espiral exterior (anillo abierto con extremo redondeado) -->
+  <path d="M2.97 9.05A9.5 9.5 0 1 1 9.49 21.16C13 20.3 16.4 16.6 16.7 12A4.7 4.7 0 0 0 7.53 10.54A2.41 2.41 0 0 1 2.97 9.05Z"/>
+  <!-- Escalones interiores -->
+  <path d="M16.6 12.07H14.13A2.27 2.27 0 0 0 11.86 14.4H9.5A2.25 2.25 0 0 0 7.25 16.7H6A2.4 2.4 0 0 0 3.6 19.1V21.4C5.6 21.8 7.7 21.7 9.49 21.16"/>
+  <!-- Separadores curvos -->
+  <path d="M7.25 16.75C7.1 18.7 5.6 20.5 3.7 21.4"/>
+  <path d="M11.86 14.5C11.8 17.6 9.4 20.3 6.3 21.4"/>
+</svg>

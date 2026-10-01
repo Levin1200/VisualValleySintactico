@@ -2,7 +2,7 @@
   <!-- Elipse frontal -->
   <ellipse cx="16.56" cy="12" rx="5.44" ry="9.7"/>
   <!-- Elipse intermedia (parte visible) -->
-  <path d="M12.56 5.58A4.13 7.4 0 1 0 12.42 18.3"/>
+  <path d="M12.41 18.28A4.13 7.4 0 1 1 12.5 5.55"/>
   <!-- Elipse trasera (parte visible) -->
-  <path d="M6.93 7.72A3 5.4 0 1 0 6.93 16.1"/>
+  <path d="M6.94 16.03A3 5.4 0 1 1 6.93 7.73"/>
 </svg>

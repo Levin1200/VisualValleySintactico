@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Elipse frontal -->
+  <ellipse cx="16.56" cy="12" rx="5.44" ry="9.7"/>
+  <!-- Elipse intermedia (parte visible) -->
+  <path d="M12.56 5.58A4.13 7.4 0 1 0 12.42 18.3"/>
+  <!-- Elipse trasera (parte visible) -->
+  <path d="M6.93 7.72A3 5.4 0 1 0 6.93 16.1"/>
+</svg>

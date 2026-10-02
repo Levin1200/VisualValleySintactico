@@ -1,6 +1,6 @@
 # Dot Avatar
 
-Personajes de puntos animados en SVG para darle cara a un agente de IA: 7 formas, 21 expresiones, 8 estados animados, cualquier color, y exportación a SVG animado o PNG. Sin dependencias.
+Personajes de puntos animados en SVG para darle cara a un agente de IA: 7 formas, 3 pieles (lisa, peludito y plástico), 21 expresiones, 8 estados animados, cualquier color, y exportación a SVG animado o PNG. Sin dependencias.
 
 - `src/dot-avatar.js`: la librería como módulo ES (`import`).
 - `dist/dot-avatar.js`: la misma librería para usar con `<script>` (expone `window.DotAvatar`). Se genera con `npm run build`.
@@ -53,6 +53,7 @@ const png = await renderPNG(cfg, 512);                                          
 | `expression` | `neutral`, `calm`, `happy`, `wink`, `shy`, `joyful`, `surprised`, `shocked`, `sleepy`, `focused`, `unimpressed`, `determined`, `playful`, `love`, `starstruck`, `dizzy`, `curious`, `dreamy`, `thoughtful`, `sideeye`, `positive` | `neutral` |
 | `state` | `idle`, `listening`, `thinking`, `writing`, `success`, `alert`, `error`, `asleep` | `idle` |
 | `color` | cualquier hex (`#01A2A8`, `#abc`) | `#01A2A8` |
+| `skin` | `flat` (lisa), `plush` (peludito), `plastic` (plástico brillante) | `flat` |
 | `ink` | `auto` (contraste automático), `dark`, `light` | `auto` |
 | `speed` | multiplicador de velocidad, de `0.25` a `4` | `1` |
 | `eyeSize` | tamaño de los ojos, de `0.5` a `1.6` | `1` |
@@ -82,14 +83,15 @@ Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 - `Avatar`: `.update(patch)`, `.setState()`, `.setExpression()`, `.setShape()`, `.setColor()`, `.toSVG(opts)`, `.toPNG(size, opts)`, `.toCode()`, `.destroy()`
 - `renderSVG(cfg, { animated = true, size, background, id, title })` → `string`
 - `renderPNG(cfg, size = 512, { background })` → `Promise<Blob>`
-- `encode(cfg)` / `decode(code)`: código compartible `forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10]`. Los campos finales con su valor por defecto se omiten, y los códigos antiguos siguen funcionando.
+- `encode(cfg)` / `decode(code)`: código compartible `forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel]`. Los campos finales con su valor por defecto se omiten, y los códigos antiguos siguen funcionando.
 - `random(seed?)`: configuración aleatoria (determinista si pasas semilla)
 - `normalize(cfg)`, `inkFor(cfg)`, `shapePath(shape, fase)`
 - `defineElement(tag = 'dot-avatar')`: se llama sola al cargar en el navegador
-- Catálogos: `SHAPES`, `EXPRESSIONS`, `STATES`, `PALETTE`, `INKS`, `DEFAULTS`, `EYE_RANGES` (límites y pasos de los ajustes de ojos)
+- Catálogos: `SHAPES`, `EXPRESSIONS`, `STATES`, `SKINS`, `PALETTE`, `INKS`, `DEFAULTS`, `EYE_RANGES` (límites y pasos de los ajustes de ojos)
 
 ## Detalles
 
+- Las pieles también son vectoriales: el plástico usa degradados y un brillo recortado a la silueta, y el peludito dibuja mechones con trazos (siempre los mismos para cada forma). El blob peludito no se deforma para que el pelo no se despegue de la silueta.
 - Todo es vectorial. Las animaciones son CSS dentro del propio SVG, y la deformación del `blob` usa SMIL. Por eso el SVG exportado también se anima al usarlo en `<img>`.
 - Cada avatar aísla su CSS con un prefijo propio, así que puedes tener muchos en la misma página sin conflictos.
 - Respeta `prefers-reduced-motion`.

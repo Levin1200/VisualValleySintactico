@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   renderSVG, normalize, encode, decode, random, inkFor, shapePath,
-  SHAPES, EXPRESSIONS, STATES, DEFAULTS,
+  SHAPES, EXPRESSIONS, STATES, SKINS, DEFAULTS,
 } from '../src/dot-avatar.js';
 
 const balanced = (svg) => {
@@ -99,4 +99,30 @@ test('el código guarda los ojos y sigue leyendo códigos antiguos', () => {
   assert.deepEqual(decode(encode(cfg)), normalize(cfg));
   assert.equal(encode({ eyeSize: 1.2 }), 'round.neutral.idle.01a2a8.auto.100.120');
   assert.deepEqual(decode('clover.love.asleep.6918ce.light.150'), normalize({ shape: 'clover', expression: 'love', state: 'asleep', color: '#6918CE', ink: 'light', speed: 1.5 }));
+});
+
+test('pieles: lisa, peludito y plástico', () => {
+  for (const shape of Object.keys(SHAPES))
+    for (const skin of Object.keys(SKINS))
+      for (const state of Object.keys(STATES)) {
+        const svg = renderSVG({ shape, skin, state });
+        assert.ok(!/NaN|undefined/.test(svg), `${shape}/${skin}/${state}`);
+        balanced(svg);
+      }
+  const flat = renderSVG({ skin: 'flat' });
+  assert.ok(!flat.includes('<defs>'), 'la piel lisa no añade definiciones');
+  const plush = renderSVG({ skin: 'plush', shape: 'blob' });
+  assert.ok(plush.includes('radialGradient') && (plush.match(/stroke-linecap="round"/g) || []).length >= 5, 'peludito lleva sombreado y pelaje');
+  assert.ok(!plush.includes('<animate'), 'el blob peludito no se deforma');
+  const plastic = renderSVG({ skin: 'plastic', shape: 'blob' });
+  assert.ok(plastic.includes('clipPath') && plastic.includes('-hl'), 'plástico lleva brillo recortado a la silueta');
+  assert.equal((plastic.match(/<animate attributeName="d"/g) || []).length, 2, 'el brillo sigue al blob deformándose');
+  assert.equal(renderSVG({ skin: 'plush' }), renderSVG({ skin: 'plush' }), 'el pelaje es determinista');
+});
+
+test('la piel viaja en el código compartible', () => {
+  assert.equal(encode({ skin: 'plush' }), 'round.neutral.idle.01a2a8.auto.100.100.100.0.plush');
+  assert.equal(decode(encode({ skin: 'plastic', eyeSize: 1.2 })).skin, 'plastic');
+  assert.equal(decode('round.neutral.idle.01a2a8.auto').skin, 'flat');
+  assert.equal(normalize({ skin: 'metal' }).skin, 'flat');
 });

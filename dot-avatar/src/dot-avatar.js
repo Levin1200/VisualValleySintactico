@@ -110,12 +110,20 @@ export const STATES = {
 
 export const INKS = { auto: 'Automática', dark: 'Oscura', light: 'Clara' };
 
+/** Acabado del cuerpo. */
+export const SKINS = {
+  flat: { label: 'Lisa' },
+  plush: { label: 'Peludito' },
+  plastic: { label: 'Plástico' },
+};
+
 export const DEFAULTS = Object.freeze({
   shape: 'round',
   expression: 'neutral',
   state: 'idle',
   color: '#01A2A8',
   ink: 'auto',
+  skin: 'flat',
   speed: 1,
   eyeSize: 1,
   eyeGap: 1,
@@ -179,6 +187,7 @@ export function normalize(cfg = {}) {
     state: pick(cfg.state, STATES, DEFAULTS.state),
     color: normColor(cfg.color) || DEFAULTS.color,
     ink: pick(cfg.ink, INKS, DEFAULTS.ink),
+    skin: pick(cfg.skin, SKINS, DEFAULTS.skin),
     speed: Number.isFinite(speed) && speed > 0 ? Math.min(4, Math.max(0.25, speed)) : DEFAULTS.speed,
     eyeSize: range('eyeSize'),
     eyeGap: range('eyeGap'),
@@ -205,21 +214,21 @@ export function inkFor(cfg) {
 
 /**
  * Código compacto y legible para compartir:
- * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10]
+ * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel]
  * Los campos finales con su valor por defecto se omiten.
  */
 export function encode(cfg) {
   const c = normalize(cfg);
   const parts = [c.shape, c.expression, c.state, c.color.slice(1).toLowerCase(), c.ink];
-  const tail = [c.speed * 100, c.eyeSize * 100, c.eyeGap * 100, c.eyeY * 10].map(Math.round);
-  const defaults = [100, 100, 100, 0];
+  const tail = [c.speed * 100, c.eyeSize * 100, c.eyeGap * 100, c.eyeY * 10].map((v) => String(Math.round(v))).concat(c.skin);
+  const defaults = ['100', '100', '100', '0', 'flat'];
   let n = tail.length;
   while (n && tail[n - 1] === defaults[n - 1]) n--;
-  return parts.concat(tail.slice(0, n).map(String)).join('.');
+  return parts.concat(tail.slice(0, n)).join('.');
 }
 
 export function decode(code) {
-  const [shape, expression, state, color, ink, speed, size, gap, y] = String(code || '').split('.');
+  const [shape, expression, state, color, ink, speed, size, gap, y, skin] = String(code || '').split('.');
   const scaled = (v, k, d) => (v ? Number(v) / k : d);
   return normalize({
     shape, expression, state, color: color && '#' + color, ink,
@@ -227,25 +236,31 @@ export function decode(code) {
     eyeSize: scaled(size, 100, 1),
     eyeGap: scaled(gap, 100, 1),
     eyeY: scaled(y, 10, 0),
+    skin,
   });
 }
 
 /** Avatar aleatorio; con la misma semilla siempre sale el mismo. */
-export function random(seed = Math.random() * 2 ** 32) {
+function prng(seed) {
   let a = seed >>> 0;
-  const rnd = () => {
+  return () => {
     a = (a + 0x6d2b79f5) >>> 0;
     let t = a;
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+export function random(seed = Math.random() * 2 ** 32) {
+  const rnd = prng(seed);
   const any = (arr) => arr[Math.floor(rnd() * arr.length)];
   return normalize({
     shape: any(Object.keys(SHAPES)),
     expression: any(Object.keys(EXPRESSIONS)),
     state: 'idle',
     color: any(PALETTE),
+    skin: any(Object.keys(SKINS)),
   });
 }
 
@@ -281,6 +296,84 @@ export function shapePath(shape, phase = 0) {
     pts.push([BODY.cx + r * Math.cos(t), BODY.cy + r * Math.sin(t)]);
   }
   return smoothClosed(pts);
+}
+
+// ---------------------------------------------------------------------------
+// Pieles
+// ---------------------------------------------------------------------------
+
+function mix(hex, target, t) {
+  const a = parseInt(hex.slice(1), 16), b = parseInt(target.slice(1), 16);
+  const ch = (sh) => Math.round(((a >> sh) & 255) + (((b >> sh) & 255) - ((a >> sh) & 255)) * t);
+  return '#' + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1).toUpperCase();
+}
+const lighten = (c, t) => mix(c, '#FFFFFF', t);
+const darken = (c, t) => mix(c, '#000000', t);
+
+/** Relleno del cuerpo y capas encima (debajo de los ojos) según la piel. */
+function skinLayers(c, id, d, morph) {
+  if (c.skin === 'plastic') {
+    const defs =
+      `<radialGradient id="${id}-shade" cx=".38" cy=".3" r=".85">` +
+      `<stop offset="0" stop-color="${lighten(c.color, 0.3)}"/><stop offset=".5" stop-color="${c.color}"/>` +
+      `<stop offset="1" stop-color="${darken(c.color, 0.24)}"/></radialGradient>` +
+      `<linearGradient id="${id}-hl" x1="0" y1="0" x2="0" y2="1">` +
+      `<stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>` +
+      `<clipPath id="${id}-clip"><path d="${d}">${morph}</path></clipPath>`;
+    const over =
+      `<g clip-path="url(#${id}-clip)">` +
+      `<ellipse cx="39" cy="35" rx="13" ry="7.5" transform="rotate(-28 39 35)" fill="url(#${id}-hl)"/>` +
+      `<ellipse cx="63" cy="74" rx="15" ry="4.5" transform="rotate(-28 63 74)" fill="#fff" opacity=".16"/></g>` +
+      `<circle cx="35.5" cy="31.5" r="2" fill="#fff" opacity=".85"/>`;
+    return { defs, fill: `url(#${id}-shade)`, over };
+  }
+  if (c.skin === 'plush') {
+    const defs =
+      `<radialGradient id="${id}-shade" cx=".42" cy=".36" r=".8">` +
+      `<stop offset="0" stop-color="${lighten(c.color, 0.16)}"/><stop offset=".6" stop-color="${c.color}"/>` +
+      `<stop offset="1" stop-color="${darken(c.color, 0.14)}"/></radialGradient>`;
+    return { defs, fill: `url(#${id}-shade)`, over: furMarkup(c) };
+  }
+  return { defs: '', fill: c.color, over: '' };
+}
+
+/** Pelaje: mechones cortos en el borde y pelusa suave sobre el cuerpo (siempre igual para cada forma). */
+function furMarkup(c) {
+  const fn = SHAPES[c.shape].r;
+  let seed = 7;
+  for (const ch of c.shape) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
+  const rnd = prng(seed);
+  const seg = (x0, y0, x1, y1) => `M${num(x0)} ${num(y0)}L${num(x1)} ${num(y1)}`;
+
+  const rim = ['', '', ''];
+  const N = 300;
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * TAU - Math.PI / 2 + (rnd() - 0.5) * 0.03;
+    const r = BODY.r * fn(t, 0);
+    const a = t + (rnd() - 0.5) * 0.9;            // cada mechón se tuerce un poco
+    const len = 1.6 + rnd() * 2.2;
+    const x0 = BODY.cx + (r - 1.6) * Math.cos(t), y0 = BODY.cy + (r - 1.6) * Math.sin(t);
+    rim[i % 3 === 0 ? 0 : rnd() < 0.5 ? 1 : 2] += seg(x0, y0, x0 + (len + 1.6) * Math.cos(a), y0 + (len + 1.6) * Math.sin(a));
+  }
+
+  const fuzz = ['', ''];
+  for (let i = 0; i < 220; i++) {
+    const t = rnd() * TAU;
+    const rr = BODY.r * fn(t, 0) * Math.sqrt(rnd()) * 0.9;
+    const x = BODY.cx + rr * Math.cos(t), y = BODY.cy + rr * Math.sin(t);
+    const a = t + (rnd() - 0.5) * 1.4, l = 1 + rnd() * 1.4;
+    fuzz[i % 2] += seg(x, y, x + l * Math.cos(a), y + l * Math.sin(a));
+  }
+
+  const line = (d, color, w, op = 1) =>
+    `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"${op < 1 ? ` opacity="${op}"` : ''}/>`;
+  return (
+    line(fuzz[0], lighten(c.color, 0.3), 0.8, 0.4) +
+    line(fuzz[1], darken(c.color, 0.14), 0.8, 0.35) +
+    line(rim[1], c.color, 1.3) +
+    line(rim[2], darken(c.color, 0.12), 1.3) +
+    line(rim[0], lighten(c.color, 0.18), 1.3)
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -405,12 +498,15 @@ export function renderSVG(cfg, opts = {}) {
   const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
   const title = opts.title || `Avatar ${EXPRESSIONS[c.expression].label.toLowerCase()}, ${st.label.toLowerCase()}`;
 
-  let shape = `<path d="${shapePath(c.shape, 0)}" fill="${c.color}">`;
-  if (animated && SHAPES[c.shape].morph) {
+  // el pelaje se calcula sobre la silueta fija, así que el blob peludito no se deforma
+  const d = shapePath(c.shape, 0);
+  let morph = '';
+  if (animated && SHAPES[c.shape].morph && c.skin !== 'plush') {
     const frames = [0, 1, 2, 3, 4, 5, 6].map((k) => shapePath(c.shape, (k / 6) * TAU));
-    shape += `<animate attributeName="d" dur="${num(7 / c.speed)}s" repeatCount="indefinite" values="${frames.join(';')}"/>`;
+    morph = `<animate attributeName="d" dur="${num(7 / c.speed)}s" repeatCount="indefinite" values="${frames.join(';')}"/>`;
   }
-  shape += '</path>';
+  const skin = skinLayers(c, id, d, morph);
+  const shape = `<path d="${d}" fill="${skin.fill}">${morph}</path>${skin.over}`;
 
   // las mejillas acompañan a los ojos: debajo y un poco hacia afuera
   const chX = EYE.dx * c.eyeGap + 4.5, chY = num(57.5 + c.eyeY);
@@ -421,6 +517,7 @@ export function renderSVG(cfg, opts = {}) {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"${size} class="${id}" role="img" aria-label="${title}">` +
     (animated ? `<style>${css(id, st, c.speed)}</style>` : '') +
+    (skin.defs ? `<defs>${skin.defs}</defs>` : '') +
     (opts.background ? `<rect width="100" height="100" fill="${opts.background}"/>` : '') +
     `<g class="da-body">${shape}${cheeks}<g class="da-eyes">` +
     eyeMarkup(expr.eyes[0], 'l', ink, c) +
@@ -491,7 +588,7 @@ export function mount(el, cfg, opts) {
 
 // atributos de la etiqueta → clave de configuración
 const CFG_ATTRS = {
-  shape: 'shape', expression: 'expression', state: 'state', color: 'color', ink: 'ink', speed: 'speed',
+  shape: 'shape', expression: 'expression', state: 'state', color: 'color', ink: 'ink', skin: 'skin', speed: 'speed',
   'eye-size': 'eyeSize', 'eye-gap': 'eyeGap', 'eye-y': 'eyeY',
 };
 const ATTRS = [...Object.keys(CFG_ATTRS), 'size', 'code'];

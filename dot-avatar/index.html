@@ -82,6 +82,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .tiles .opt:hover{background:var(--surface)}
 .tiles .opt[aria-pressed="true"]{background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--text)}
 .tiles .opt svg{display:block;width:100%;height:100%}
+.tiles.skins{grid-template-columns:repeat(7,1fr)}
 
 .sliders{display:flex;flex-direction:column;gap:8px}
 .slider{display:grid;grid-template-columns:76px 1fr 44px;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
@@ -176,6 +177,10 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
       <div class="tiles" id="shapes"></div>
     </div>
     <div class="group">
+      <div class="label">Piel <span id="lblSkin"></span></div>
+      <div class="tiles skins" id="skins"></div>
+    </div>
+    <div class="group">
       <div class="label">Color</div>
       <div class="colors" id="colors">
         <label class="picker" title="Otro color"><input type="color" id="colorPick" aria-label="Elegir otro color"></label>
@@ -245,7 +250,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   D.mount($('logo'), { shape: 'blob', expression: 'happy', color: '#01A2A8' }, { animated: false });
 
   // ---------- controles ----------
-  const shapeBtns = {}, exprBtns = {}, stateBtns = {}, swatches = {};
+  const shapeBtns = {}, exprBtns = {}, stateBtns = {}, skinBtns = {}, swatches = {};
   const option = (label, onClick) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'opt'; b.title = label; b.setAttribute('aria-label', label);
@@ -255,6 +260,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   for (const [k, v] of Object.entries(D.STATES)) { const b = option(v.label, () => set({ state: k })); b.textContent = v.label; $('states').append(stateBtns[k] = b); }
   for (const [k, v] of Object.entries(D.EXPRESSIONS)) $('exprs').append(exprBtns[k] = option(v.label, () => set({ expression: k })));
   for (const [k, v] of Object.entries(D.SHAPES)) $('shapes').append(shapeBtns[k] = option(v.label, () => set({ shape: k })));
+  for (const [k, v] of Object.entries(D.SKINS)) $('skins').append(skinBtns[k] = option(v.label, () => set({ skin: k })));
   for (const c of D.PALETTE) {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'sw'; b.style.background = c; b.setAttribute('aria-label', 'Color ' + c); b.title = c;
@@ -297,6 +303,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
     const mini = (patch) => D.renderSVG({ ...cfg, ...patch, state: 'idle' }, { animated: false });
     for (const [k, b] of Object.entries(exprBtns)) { b.innerHTML = mini({ expression: k }); b.setAttribute('aria-pressed', k === cfg.expression); }
     for (const [k, b] of Object.entries(shapeBtns)) { b.innerHTML = mini({ shape: k }); b.setAttribute('aria-pressed', k === cfg.shape); }
+    for (const [k, b] of Object.entries(skinBtns)) { b.innerHTML = mini({ skin: k }); b.setAttribute('aria-pressed', k === cfg.skin); }
     for (const [k, b] of Object.entries(stateBtns)) b.setAttribute('aria-pressed', k === cfg.state);
     for (const [c, b] of Object.entries(swatches)) b.setAttribute('aria-pressed', c === cfg.color);
     $('colorPick').value = cfg.color; $('colorHex').value = cfg.color;
@@ -305,6 +312,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
     $('ink').value = cfg.ink; $('speed').value = cfg.speed; $('speedVal').textContent = '×' + cfg.speed;
     $('lblExpr').textContent = D.EXPRESSIONS[cfg.expression].label;
     $('lblShape').textContent = D.SHAPES[cfg.shape].label;
+    $('lblSkin').textContent = D.SKINS[cfg.skin].label;
     $('nowExpr').textContent = D.EXPRESSIONS[cfg.expression].label;
     $('nowState').textContent = D.STATES[cfg.state].label;
     $('nowShape').textContent = D.SHAPES[cfg.shape].label;
@@ -315,6 +323,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
 
   const htmlSnippet = () => {
     const attrs = [`shape="${cfg.shape}"`, `expression="${cfg.expression}"`, `state="${cfg.state}"`, `color="${cfg.color}"`];
+    if (cfg.skin !== 'flat') attrs.push(`skin="${cfg.skin}"`);
     if (cfg.ink !== 'auto') attrs.push(`ink="${cfg.ink}"`);
     if (cfg.speed !== 1) attrs.push(`speed="${cfg.speed}"`);
     if (cfg.eyeSize !== 1) attrs.push(`eye-size="${cfg.eyeSize}"`);
@@ -356,7 +365,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   $('btnShare').addEventListener('click', () => copyText(location.href, 'Enlace copiado'));
   $('btnCopyCode').addEventListener('click', actions.copyHtml);
   $('btnRandom').addEventListener('click', () => {
-    const { state, ink, speed, eyeSize, eyeGap, eyeY } = cfg;   // conserva tus ajustes; cambia forma, expresión y color
+    const { state, ink, speed, eyeSize, eyeGap, eyeY } = cfg;   // conserva tus ajustes; cambia forma, expresión, color y piel
     cfg = { ...D.random(), state, ink, speed, eyeSize, eyeGap, eyeY };
     sync();
   });

@@ -305,78 +305,65 @@ function shapePath(shape, phase = 0) {
 // Pieles
 // ---------------------------------------------------------------------------
 
-function mix(hex, target, t) {
-  const a = parseInt(hex.slice(1), 16), b = parseInt(target.slice(1), 16);
-  const ch = (sh) => Math.round(((a >> sh) & 255) + (((b >> sh) & 255) - ((a >> sh) & 255)) * t);
-  return '#' + ((1 << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).slice(1).toUpperCase();
-}
-const lighten = (c, t) => mix(c, '#FFFFFF', t);
-const darken = (c, t) => mix(c, '#000000', t);
-
-/** Relleno del cuerpo y capas encima (debajo de los ojos) según la piel. */
-function skinLayers(c, id, d, morph) {
-  if (c.skin === 'plastic') {
-    const defs =
-      `<radialGradient id="${id}-shade" cx=".38" cy=".3" r=".85">` +
-      `<stop offset="0" stop-color="${lighten(c.color, 0.3)}"/><stop offset=".5" stop-color="${c.color}"/>` +
-      `<stop offset="1" stop-color="${darken(c.color, 0.24)}"/></radialGradient>` +
-      `<linearGradient id="${id}-hl" x1="0" y1="0" x2="0" y2="1">` +
-      `<stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>` +
-      `<clipPath id="${id}-clip"><path d="${d}">${morph}</path></clipPath>`;
-    const over =
-      `<g clip-path="url(#${id}-clip)">` +
-      `<ellipse cx="39" cy="35" rx="13" ry="7.5" transform="rotate(-28 39 35)" fill="url(#${id}-hl)"/>` +
-      `<ellipse cx="63" cy="74" rx="15" ry="4.5" transform="rotate(-28 63 74)" fill="#fff" opacity=".16"/></g>` +
-      `<circle cx="35.5" cy="31.5" r="2" fill="#fff" opacity=".85"/>`;
-    return { defs, fill: `url(#${id}-shade)`, over };
-  }
-  if (c.skin === 'plush') {
-    const defs =
-      `<radialGradient id="${id}-shade" cx=".42" cy=".36" r=".8">` +
-      `<stop offset="0" stop-color="${lighten(c.color, 0.16)}"/><stop offset=".6" stop-color="${c.color}"/>` +
-      `<stop offset="1" stop-color="${darken(c.color, 0.14)}"/></radialGradient>`;
-    return { defs, fill: `url(#${id}-shade)`, over: furMarkup(c) };
-  }
-  return { defs: '', fill: c.color, over: '' };
-}
-
-/** Pelaje: mechones cortos en el borde y pelusa suave sobre el cuerpo (siempre igual para cada forma). */
-function furMarkup(c) {
-  const fn = SHAPES[c.shape].r;
-  let seed = 7;
-  for (const ch of c.shape) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
-  const rnd = prng(seed);
-  const seg = (x0, y0, x1, y1) => `M${num(x0)} ${num(y0)}L${num(x1)} ${num(y1)}`;
-
-  const rim = ['', '', ''];
-  const N = 300;
-  for (let i = 0; i < N; i++) {
-    const t = (i / N) * TAU - Math.PI / 2 + (rnd() - 0.5) * 0.03;
-    const r = BODY.r * fn(t, 0);
-    const a = t + (rnd() - 0.5) * 0.9;            // cada mechón se tuerce un poco
-    const len = 1.6 + rnd() * 2.2;
-    const x0 = BODY.cx + (r - 1.6) * Math.cos(t), y0 = BODY.cy + (r - 1.6) * Math.sin(t);
-    rim[i % 3 === 0 ? 0 : rnd() < 0.5 ? 1 : 2] += seg(x0, y0, x0 + (len + 1.6) * Math.cos(a), y0 + (len + 1.6) * Math.sin(a));
-  }
-
-  const fuzz = ['', ''];
-  for (let i = 0; i < 220; i++) {
-    const t = rnd() * TAU;
-    const rr = BODY.r * fn(t, 0) * Math.sqrt(rnd()) * 0.9;
-    const x = BODY.cx + rr * Math.cos(t), y = BODY.cy + rr * Math.sin(t);
-    const a = t + (rnd() - 0.5) * 1.4, l = 1 + rnd() * 1.4;
-    fuzz[i % 2] += seg(x, y, x + l * Math.cos(a), y + l * Math.sin(a));
-  }
-
-  const line = (d, color, w, op = 1) =>
-    `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"${op < 1 ? ` opacity="${op}"` : ''}/>`;
+/**
+ * Volumen de cojín: luz interior arriba a la izquierda y sombra interior abajo a la derecha,
+ * calculadas desenfocando y desplazando la propia silueta. Todo en unidades del dibujo,
+ * así que se ve igual a cualquier tamaño.
+ */
+function volumeFx(blur, offset, shade, glow) {
   return (
-    line(fuzz[0], lighten(c.color, 0.3), 0.8, 0.4) +
-    line(fuzz[1], darken(c.color, 0.14), 0.8, 0.35) +
-    line(rim[1], c.color, 1.3) +
-    line(rim[2], darken(c.color, 0.12), 1.3) +
-    line(rim[0], lighten(c.color, 0.18), 1.3)
+    `<feGaussianBlur in="SourceAlpha" stdDeviation="${blur}" result="b"/>` +
+    `<feOffset in="b" dx="${-offset}" dy="${num(-offset * 1.25)}" result="bu"/>` +
+    `<feComposite in="SourceAlpha" in2="bu" operator="arithmetic" k2="1" k3="-1" result="sm"/>` +
+    `<feFlood flood-color="#06060C" flood-opacity="${shade}"/><feComposite in2="sm" operator="in" result="shade"/>` +
+    `<feOffset in="b" dx="${offset}" dy="${num(offset * 1.25)}" result="bd"/>` +
+    `<feComposite in="SourceAlpha" in2="bd" operator="arithmetic" k2="1" k3="-1" result="lm"/>` +
+    `<feFlood flood-color="#FFFFFF" flood-opacity="${glow}"/><feComposite in2="lm" operator="in" result="glow"/>` +
+    `<feMerge result="vol"><feMergeNode in="SourceGraphic"/><feMergeNode in="glow"/><feMergeNode in="shade"/></feMerge>`
   );
+}
+
+/** Cuerpo según la piel: color plano, peluche (pelaje con ruido fino) o plástico brillante. */
+function skinBody(c, id, d, morph) {
+  const flat = `<path d="${d}" fill="${c.color}">${morph}</path>`;
+  if (c.skin === 'flat') return { defs: '', body: flat };
+
+  // luz general: más clara arriba a la izquierda, más oscura en el borde
+  const light =
+    `<radialGradient id="${id}-sh" cx=".4" cy=".35" r=".75">` +
+    `<stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/>` +
+    `<stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>`;
+  const layers = flat + `<path d="${d}" fill="url(#${id}-sh)">${morph}</path>`;
+
+  if (c.skin === 'plush') {
+    const fur =
+      `<filter id="${id}-fur" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">` +
+      volumeFx(9, 7, 0.65, 0.3) +
+      // borde deshilachado: ruido fino que desplaza la silueta
+      `<feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="4" result="n"/>` +
+      `<feDisplacementMap in="vol" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G" result="fuzzy"/>` +
+      // grano del pelo sobre todo el cuerpo
+      `<feTurbulence type="fractalNoise" baseFrequency="2" numOctaves="2" seed="11" result="g"/>` +
+      `<feColorMatrix in="g" type="saturate" values="0" result="gg"/>` +
+      `<feComposite in="fuzzy" in2="gg" operator="arithmetic" k1=".28" k2=".86" result="grain"/>` +
+      `<feGaussianBlur in="grain" stdDeviation=".35" result="soft"/>` +
+      `<feComposite in="soft" in2="fuzzy" operator="in"/></filter>`;
+    return { defs: fur + light, body: `<g filter="url(#${id}-fur)">${layers}</g>` };
+  }
+
+  // plástico: volumen liso, borde más oscuro y un reflejo suave recortado a la silueta
+  const gloss =
+    `<filter id="${id}-gloss" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">` +
+    volumeFx(6, 4, 0.55, 0.45) +
+    `<feComposite in="vol" in2="SourceAlpha" operator="in"/></filter>` +
+    `<filter id="${id}-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>` +
+    `<clipPath id="${id}-clip"><path d="${d}">${morph}</path></clipPath>`;
+  return {
+    defs: gloss + light,
+    body:
+      `<g filter="url(#${id}-gloss)">${layers}</g>` +
+      `<g clip-path="url(#${id}-clip)"><ellipse cx="38" cy="33" rx="10" ry="5" transform="rotate(-30 38 33)" fill="#fff" opacity=".55" filter="url(#${id}-soft)"/></g>`,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -501,15 +488,14 @@ function renderSVG(cfg, opts = {}) {
   const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
   const title = opts.title || `Avatar ${EXPRESSIONS[c.expression].label.toLowerCase()}, ${st.label.toLowerCase()}`;
 
-  // el pelaje se calcula sobre la silueta fija, así que el blob peludito no se deforma
   const d = shapePath(c.shape, 0);
   let morph = '';
-  if (animated && SHAPES[c.shape].morph && c.skin !== 'plush') {
+  if (animated && SHAPES[c.shape].morph) {
     const frames = [0, 1, 2, 3, 4, 5, 6].map((k) => shapePath(c.shape, (k / 6) * TAU));
     morph = `<animate attributeName="d" dur="${num(7 / c.speed)}s" repeatCount="indefinite" values="${frames.join(';')}"/>`;
   }
-  const skin = skinLayers(c, id, d, morph);
-  const shape = `<path d="${d}" fill="${skin.fill}">${morph}</path>${skin.over}`;
+  const skin = skinBody(c, id, d, morph);
+  const shape = skin.body;
 
   // las mejillas acompañan a los ojos: debajo y un poco hacia afuera
   const chX = EYE.dx * c.eyeGap + 4.5, chY = num(57.5 + c.eyeY);

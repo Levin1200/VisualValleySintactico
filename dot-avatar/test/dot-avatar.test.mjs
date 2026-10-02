@@ -110,13 +110,14 @@ test('pieles: lisa, peludito y plástico', () => {
         balanced(svg);
       }
   const flat = renderSVG({ skin: 'flat' });
-  assert.ok(!flat.includes('<defs>'), 'la piel lisa no añade definiciones');
+  assert.ok(!flat.includes('<defs>') && !flat.includes('filter='), 'la piel lisa no añade definiciones ni filtros');
   const plush = renderSVG({ skin: 'plush', shape: 'blob' });
-  assert.ok(plush.includes('radialGradient') && (plush.match(/stroke-linecap="round"/g) || []).length >= 5, 'peludito lleva sombreado y pelaje');
-  assert.ok(!plush.includes('<animate'), 'el blob peludito no se deforma');
+  assert.ok(plush.includes('feTurbulence') && plush.includes('feDisplacementMap'), 'peludito lleva pelaje con ruido');
+  assert.equal((plush.match(/<animate attributeName="d"/g) || []).length, 2, 'el blob peludito se deforma con el pelo pegado');
   const plastic = renderSVG({ skin: 'plastic', shape: 'blob' });
-  assert.ok(plastic.includes('clipPath') && plastic.includes('-hl'), 'plástico lleva brillo recortado a la silueta');
-  assert.equal((plastic.match(/<animate attributeName="d"/g) || []).length, 2, 'el brillo sigue al blob deformándose');
+  assert.ok(plastic.includes('clipPath') && plastic.includes('-gloss'), 'plástico lleva volumen y brillo recortado');
+  assert.equal((plastic.match(/<animate attributeName="d"/g) || []).length, 3, 'el brillo sigue al blob deformándose');
+  assert.ok(!/feDiffuseLighting|feSpecularLighting/.test(plush + plastic), 'sin iluminación dependiente de la resolución');
   assert.equal(renderSVG({ skin: 'plush' }), renderSVG({ skin: 'plush' }), 'el pelaje es determinista');
 });
 

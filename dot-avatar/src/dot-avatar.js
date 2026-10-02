@@ -102,7 +102,7 @@ export const STATES = {
   listening: { label: 'Escuchando', body: 'sway', dur: 2.4, blink: true, extra: 'waves' },
   thinking: { label: 'Pensando', body: 'ponder', dur: 4, blink: true, look: 'think', extra: 'thought' },
   writing: { label: 'Escribiendo', body: 'bob', dur: 0.7, blink: true, look: 'write', extra: 'typing' },
-  success: { label: 'Éxito', body: 'hop', dur: 1.4, eyes: 'happy', extra: 'sparkles' },
+  success: { label: 'Éxito', body: 'hop', dur: 1.4, eyes: 'happy' },
   alert: { label: 'Alerta', body: 'wiggle', dur: 1.8, eyes: 'surprised', extra: 'alert' },
   error: { label: 'Error', body: 'shake', dur: 1.6, eyes: 'dizzy', extra: 'error' },
   asleep: { label: 'Dormido', body: 'snooze', dur: 4.8, eyes: 'sleepy', extra: 'zzz' },
@@ -314,13 +314,6 @@ function extraMarkup(kind, accent, ink) {
         `<rect x="60" y="84" width="28" height="12" rx="6" fill="${accent}"/>` +
         [67, 74, 81].map((x, i) => `<circle class="da-d da-d${i}" cx="${x}" cy="90" r="1.8" fill="${ink}"/>`).join('')
       );
-    case 'sparkles':
-      return [[17, 24, 1], [85, 28, 0.8], [14, 70, 0.7], [87, 68, 1]]
-        .map(
-          ([x, y, k], i) =>
-            `<g transform="translate(${x} ${y}) scale(${k})"><path class="da-sp da-sp${i}" fill="${accent}" d="M0-5L1.3-1.3 5 0 1.3 1.3 0 5-1.3 1.3-5 0-1.3-1.3Z"/></g>`
-        )
-        .join('');
     case 'alert':
     case 'error': {
       const fill = kind === 'alert' ? '#F5A524' : '#E5484D';
@@ -375,12 +368,6 @@ function css(id, st, speed) {
         `${p} .da-d{animation:${id}-dot ${S(1)} ease-in-out infinite}` +
         `${p} .da-d1{animation-delay:${S(0.15)}}${p} .da-d2{animation-delay:${S(0.3)}}` +
         `@keyframes ${id}-dot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-2px)}}`;
-      break;
-    case 'sparkles':
-      out +=
-        `${p} .da-sp{${fb};opacity:0;animation:${id}-sp ${S(st.dur)} ease-out infinite}` +
-        [1, 2, 3].map((i) => `${p} .da-sp${i}{animation-delay:${S(0.12 * i)}}`).join('') +
-        `@keyframes ${id}-sp{0%,100%{transform:scale(0);opacity:0}30%{transform:scale(1.1);opacity:1}60%{transform:scale(.9);opacity:1}80%{transform:scale(0);opacity:0}}`;
       break;
     case 'alert':
     case 'error':

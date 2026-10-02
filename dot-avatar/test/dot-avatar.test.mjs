@@ -41,6 +41,7 @@ test('el blob se deforma con SMIL y el resto no', () => {
 test('los estados fuerzan sus ojos', () => {
   const ok = renderSVG({ expression: 'neutral', state: 'success' });
   assert.ok(ok.includes('Q0-4 4.2 2'), 'éxito usa ojos felices');
+  assert.ok(!ok.includes('da-sp'), 'éxito no lleva estrellitas');
   assert.ok(renderSVG({ state: 'error' }).includes('#E5484D'), 'error muestra la insignia roja');
 });
 

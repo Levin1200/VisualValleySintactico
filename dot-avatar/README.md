@@ -69,7 +69,7 @@ Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 | `listening` | se balancea | parpadea | ondas de sonido |
 | `thinking` | se inclina | mira arriba a los lados | burbujas de pensamiento |
 | `writing` | rebota rápido | mira abajo | globo con puntos de escritura |
-| `success` | salta | felices | destellos |
+| `success` | salta | felices | — |
 | `alert` | se sacude | sorprendidos | insignia ámbar con `!` |
 | `error` | tiembla | mareados | insignia roja con `×` |
 | `asleep` | respira lento | cerrados | `z z z` |

@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dot Avatar Lab</title>
+<meta name="description" content="Diseña el personaje animado de tu agente y expórtalo como SVG o PNG.">
+<style>
+:root{
+  --bg:#F6F6F3;--dot:#DCDCD6;--card:#FFFFFF;--well:#F2F2EE;--line:#E6E6E0;
+  --text:#1B1B20;--text-2:#62626B;--text-3:#9C9CA4;--accent:#01A2A8;--accent-ink:#FFFFFF;
+  --radius:18px;--shadow:0 1px 2px rgba(20,20,25,.05),0 20px 50px -24px rgba(20,20,25,.25);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#141417;--dot:#2A2A30;--card:#1C1C21;--well:#24242A;--line:#2E2E35;--text:#F2F2F4;--text-2:#A6A6AF;--text-3:#6E6E78;--shadow:0 20px 50px -24px rgba(0,0,0,.7);color-scheme:dark}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100vh;color:var(--text);font:14px/1.45 ui-rounded,"Segoe UI",system-ui,-apple-system,sans-serif;
+  background:var(--bg) radial-gradient(var(--dot) 1.2px,transparent 1.3px) 0 0/22px 22px;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;max-width:1180px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand .logo{width:34px;height:34px}
+.brand h1{font-size:17px;margin:0;letter-spacing:-.01em}
+.brand small{display:block;color:var(--text-2);font-size:12px;font-weight:400}
+.btn{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn:hover{border-color:var(--text-3)}
+.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn svg{width:16px;height:16px}
+.menu{position:relative}
+.menu-list{position:absolute;right:0;top:44px;z-index:20;min-width:220px;padding:6px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.menu-list button{display:block;width:100%;text-align:left;padding:9px 10px;border:0;border-radius:9px;background:none;font-weight:500}
+.menu-list button:hover{background:var(--well)}
+.menu-list hr{border:0;border-top:1px solid var(--line);margin:5px 4px}
+
+main{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:0 20px 28px}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.stage{padding:18px;position:sticky;top:12px;align-self:start}
+@media (max-width:860px){.stage{position:static}}
+.preview{aspect-ratio:1;border-radius:14px;display:grid;place-items:center;background:var(--well)}
+.preview > div{width:72%;height:72%}
+.preview svg{width:100%;height:100%;display:block}
+.now{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 0;color:var(--text-2);font-size:13px}
+.now b{color:var(--text)}
+.code{font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--well);border-radius:10px;padding:8px 10px;color:var(--text-2);word-break:break-all}
+.row{display:flex;gap:8px;margin-top:12px}
+.row .btn{flex:1;justify-content:center}
+
+.controls{padding:6px 18px 18px}
+section{padding:14px 0;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:0 0 10px;display:flex;justify-content:space-between}
+h2 span{text-transform:none;letter-spacing:0;color:var(--text-2);font-weight:500}
+.grid{display:grid;gap:8px}
+.shapes{grid-template-columns:repeat(auto-fill,minmax(74px,1fr))}
+.exprs{grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
+.states{grid-template-columns:repeat(auto-fill,minmax(124px,1fr))}
+.opt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px 7px;border-radius:12px;border:1.5px solid transparent;background:var(--well);font-size:11.5px;font-weight:600;color:var(--text-2)}
+.opt:hover{border-color:var(--line)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--card);color:var(--text)}
+.opt .ic{width:42px;height:42px;flex:none}
+.opt .lb{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .ic svg{width:100%;height:100%;display:block}
+.states .opt{flex-direction:row;justify-content:flex-start;padding:6px 8px;gap:6px}
+.states .opt .ic{width:30px;height:30px}
+
+.colors{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw{width:32px;height:32px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1.5px var(--line);padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--accent)}
+.custom{display:flex;align-items:center;gap:6px;margin-left:6px}
+.custom input[type=color]{width:34px;height:34px;padding:0;border:0;background:none}
+.custom input[type=text]{width:92px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--well);text-transform:uppercase}
+
+.settings{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.settings label{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;color:var(--text-2)}
+.settings select,.settings input[type=range]{height:34px;border-radius:10px;border:1px solid var(--line);background:var(--well);padding:0 8px}
+.settings input[type=range]{padding:0;accent-color:var(--accent)}
+
+.team{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.member{position:relative;width:60px;height:60px;border-radius:14px;background:var(--well);border:1.5px solid transparent;padding:6px}
+.member:hover{border-color:var(--line)}
+.member svg{width:100%;height:100%;display:block}
+.member .x{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--text);color:var(--bg);font-size:12px;line-height:20px;display:none}
+.member:hover .x,.member:focus-within .x{display:block}
+.empty{color:var(--text-3);font-size:13px}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;transition:.25s;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo" id="logo"></div>
+    <div><h1>Dot Avatar Lab</h1><small>Diseña el personaje de tu agente y expórtalo</small></div>
+  </div>
+  <button class="btn" id="btnShare" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>Compartir</button>
+  <button class="btn" id="btnPng" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.8"/><path d="m21 15-4.5-4.5L6 21"/></svg>Copiar PNG</button>
+  <div class="menu">
+    <button class="btn primary" id="btnExport" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="exportMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg>Exportar
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="menu-list" id="exportMenu" role="menu" hidden>
+      <button role="menuitem" data-act="copySvg">Copiar SVG animado</button>
+      <button role="menuitem" data-act="dlSvg">Descargar SVG animado</button>
+      <button role="menuitem" data-act="dlStatic">Descargar SVG estático</button>
+      <hr>
+      <button role="menuitem" data-act="dlPng">Descargar PNG</button>
+      <button role="menuitem" data-act="dlAll">Descargar todos los estados (SVG)</button>
+      <hr>
+      <button role="menuitem" data-act="copyHtml">Copiar código HTML</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="card stage">
+    <div class="preview"><div id="stage"></div></div>
+    <div class="now"><span><b id="nowExpr"></b> · <span id="nowState"></span></span><span id="nowShape"></span></div>
+    <div class="row">
+      <button class="btn" id="btnSave" type="button">+ Guardar en el equipo</button>
+      <button class="btn primary" id="btnRandom" type="button">Sorpréndeme</button>
+    </div>
+    <h2 style="margin-top:16px">Código para usarlo</h2>
+    <div class="code" id="snippet"></div>
+  </div>
+
+  <div class="card controls">
+    <section>
+      <h2>Estado <span id="lblState"></span></h2>
+      <div class="grid states" id="states"></div>
+    </section>
+    <section>
+      <h2>Expresión <span id="lblExpr"></span></h2>
+      <div class="grid exprs" id="exprs"></div>
+    </section>
+    <section>
+      <h2>Forma <span id="lblShape"></span></h2>
+      <div class="grid shapes" id="shapes"></div>
+    </section>
+    <section>
+      <h2>Color</h2>
+      <div class="colors" id="colors">
+        <div class="custom">
+          <input type="color" id="colorPick" aria-label="Elegir color">
+          <input type="text" id="colorHex" maxlength="7" spellcheck="false" aria-label="Color en hexadecimal">
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2>Ajustes</h2>
+      <div class="settings">
+        <label>Color de los ojos
+          <select id="ink"></select></label>
+        <label>Velocidad <span id="speedVal"></span>
+          <input type="range" id="speed" min="0.25" max="2" step="0.05"></label>
+        <label>Tamaño del PNG
+          <select id="pngSize"><option>128</option><option>256</option><option selected>512</option><option>1024</option></select></label>
+        <label>Fondo al exportar
+          <select id="bg"><option value="">Transparente</option><option value="#FFFFFF">Blanco</option><option value="#141417">Oscuro</option></select></label>
+      </div>
+    </section>
+    <section>
+      <h2>Equipo <span id="teamCount"></span></h2>
+      <div class="team" id="team"></div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="dist/dot-avatar.js"></script>
+<script>
+(() => {
+  const D = window.DotAvatar;
+  const $ = (id) => document.getElementById(id);
+  const TEAM_KEY = 'dot-avatar-team';
+  const PREF_KEY = 'dot-avatar-prefs';
+  const store = {
+    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+
+  // Estado de la página: la configuración viene del enlace (#a=...) si existe.
+  const fromHash = () => { const m = location.hash.match(/a=([\w.]+)/); return m ? D.decode(m[1]) : null; };
+  let cfg = fromHash() || D.normalize(store.get(PREF_KEY, {}).cfg || {});
+  const prefs = { png: 512, bg: '', ...store.get(PREF_KEY, {}) };
+
+  const stage = D.mount($('stage'), cfg);
+  D.mount($('logo'), { shape: 'blob', expression: 'happy', color: '#01A2A8' });
+
+  // ---------- construir controles ----------
+  const option = (label, svg, onClick) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'opt';
+    b.innerHTML = `<span class="ic">${svg}</span><span class="lb">${label}</span>`;
+    b.title = label;
+    b.addEventListener('click', onClick);
+    return b;
+  };
+  const shapeBtns = {}, exprBtns = {}, stateBtns = {}, swatches = {};
+
+  for (const [k, v] of Object.entries(D.SHAPES)) $('shapes').append(shapeBtns[k] = option(v.label, '', () => set({ shape: k })));
+  for (const [k, v] of Object.entries(D.EXPRESSIONS)) $('exprs').append(exprBtns[k] = option(v.label, '', () => set({ expression: k })));
+  for (const [k, v] of Object.entries(D.STATES)) $('states').append(stateBtns[k] = option(v.label, '', () => set({ state: k })));
+  for (const c of D.PALETTE) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'sw'; b.style.background = c; b.setAttribute('aria-label', 'Color ' + c);
+    b.addEventListener('click', () => set({ color: c }));
+    $('colors').insertBefore(b, $('colors').querySelector('.custom'));
+    swatches[c] = b;
+  }
+  for (const [k, v] of Object.entries(D.INKS)) $('ink').append(new Option(v, k));
+
+  $('colorPick').addEventListener('input', (e) => set({ color: e.target.value }));
+  $('colorHex').addEventListener('change', (e) => set({ color: e.target.value }));
+  $('ink').addEventListener('change', (e) => set({ ink: e.target.value }));
+  $('speed').addEventListener('input', (e) => set({ speed: +e.target.value }));
+  $('pngSize').value = String(prefs.png);
+  $('bg').value = prefs.bg;
+  $('pngSize').addEventListener('change', (e) => { prefs.png = +e.target.value; savePrefs(); });
+  $('bg').addEventListener('change', (e) => { prefs.bg = e.target.value; savePrefs(); });
+
+  // ---------- sincronizar ----------
+  function set(patch) {
+    cfg = D.normalize({ ...cfg, ...patch });
+    sync();
+  }
+  function savePrefs() { store.set(PREF_KEY, { ...prefs, cfg }); }
+
+  function sync() {
+    stage.update(cfg);
+    const mini = (patch, animated = false) => D.renderSVG({ ...cfg, ...patch }, { animated, id: 'm' + Object.values(patch).join('-') });
+    for (const [k, b] of Object.entries(shapeBtns)) { b.querySelector('.ic').innerHTML = mini({ shape: k, state: 'idle' }); b.setAttribute('aria-pressed', k === cfg.shape); }
+    for (const [k, b] of Object.entries(exprBtns)) { b.querySelector('.ic').innerHTML = mini({ expression: k, state: 'idle' }); b.setAttribute('aria-pressed', k === cfg.expression); }
+    for (const [k, b] of Object.entries(stateBtns)) { b.querySelector('.ic').innerHTML = mini({ state: k }, true); b.setAttribute('aria-pressed', k === cfg.state); }
+    for (const [c, b] of Object.entries(swatches)) b.setAttribute('aria-pressed', c === cfg.color);
+    $('colorPick').value = cfg.color; $('colorHex').value = cfg.color;
+    $('ink').value = cfg.ink; $('speed').value = cfg.speed; $('speedVal').textContent = '×' + cfg.speed;
+    $('lblShape').textContent = D.SHAPES[cfg.shape].label;
+    $('lblExpr').textContent = D.EXPRESSIONS[cfg.expression].label;
+    $('lblState').textContent = D.STATES[cfg.state].label;
+    $('nowExpr').textContent = D.EXPRESSIONS[cfg.expression].label;
+    $('nowState').textContent = D.STATES[cfg.state].label;
+    $('nowShape').textContent = D.SHAPES[cfg.shape].label;
+    $('snippet').textContent = htmlSnippet();
+    history.replaceState(null, '', '#a=' + D.encode(cfg));
+    savePrefs();
+  }
+
+  const htmlSnippet = () => {
+    const attrs = [`shape="${cfg.shape}"`, `expression="${cfg.expression}"`, `state="${cfg.state}"`, `color="${cfg.color}"`];
+    if (cfg.ink !== 'auto') attrs.push(`ink="${cfg.ink}"`);
+    if (cfg.speed !== 1) attrs.push(`speed="${cfg.speed}"`);
+    return `<script src="dot-avatar.js"><\/script>\n<dot-avatar ${attrs.join(' ')} size="96"></dot-avatar>`;
+  };
+
+  // ---------- exportar ----------
+  const toast = (msg) => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 1800); };
+  const fileName = (ext, c = cfg) => `dot-avatar-${c.shape}-${c.expression}-${c.state}.${ext}`;
+  const download = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
+  const svgOf = (animated, c = cfg) => D.renderSVG(c, { animated, size: prefs.png, background: prefs.bg || undefined });
+  async function copyText(text, ok) {
+    try { await navigator.clipboard.writeText(text); toast(ok); }
+    catch { download(new Blob([text], { type: 'text/plain' }), 'dot-avatar.txt'); toast('No se pudo copiar: se descargó un archivo'); }
+  }
+  const pngBlob = () => D.renderPNG(cfg, prefs.png, { background: prefs.bg || undefined });
+
+  $('btnPng').addEventListener('click', async () => {
+    try {
+      const blob = await pngBlob();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      toast(`PNG de ${prefs.png} px copiado`);
+    } catch {
+      download(await pngBlob(), fileName('png'));
+      toast('El navegador no permite copiar imágenes: PNG descargado');
+    }
+  });
+
+  const actions = {
+    copySvg: () => copyText(svgOf(true), 'SVG animado copiado'),
+    dlSvg: () => download(new Blob([svgOf(true)], { type: 'image/svg+xml' }), fileName('svg')),
+    dlStatic: () => download(new Blob([svgOf(false)], { type: 'image/svg+xml' }), fileName('svg')),
+    dlPng: async () => download(await pngBlob(), fileName('png')),
+    dlAll: () => { for (const s of Object.keys(D.STATES)) { const c = { ...cfg, state: s }; download(new Blob([svgOf(true, c)], { type: 'image/svg+xml' }), fileName('svg', c)); } toast('Descargando los 8 estados'); },
+    copyHtml: () => copyText(htmlSnippet(), 'Código HTML copiado'),
+  };
+  const menu = $('exportMenu'), menuBtn = $('btnExport');
+  const closeMenu = () => { menu.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); };
+  menuBtn.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; menuBtn.setAttribute('aria-expanded', String(!menu.hidden)); if (!menu.hidden) menu.querySelector('button').focus(); });
+  menu.addEventListener('click', (e) => { const a = e.target.closest('[data-act]'); if (a) { closeMenu(); actions[a.dataset.act](); } });
+  document.addEventListener('click', closeMenu);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+
+  $('btnShare').addEventListener('click', () => copyText(location.href, 'Enlace copiado'));
+  $('btnRandom').addEventListener('click', () => { cfg = { ...D.random(), state: cfg.state, ink: cfg.ink, speed: cfg.speed }; sync(); });
+
+  // ---------- equipo ----------
+  let team = store.get(TEAM_KEY, []);
+  function renderTeam() {
+    const box = $('team'); box.innerHTML = '';
+    $('teamCount').textContent = team.length ? `${team.length} guardado${team.length > 1 ? 's' : ''}` : '';
+    if (!team.length) { box.innerHTML = '<span class="empty">Guarda personajes para tenerlos a mano y reutilizarlos.</span>'; return; }
+    team.forEach((code, i) => {
+      const m = document.createElement('div'); m.className = 'member';
+      const pick = document.createElement('button');
+      pick.type = 'button'; pick.style.cssText = 'all:unset;cursor:pointer;display:block;width:100%;height:100%';
+      pick.setAttribute('aria-label', 'Cargar ' + code);
+      pick.innerHTML = D.renderSVG(D.decode(code), { id: 'tm' + i });
+      pick.addEventListener('click', () => { cfg = D.decode(code); sync(); });
+      const x = document.createElement('button');
+      x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.setAttribute('aria-label', 'Quitar del equipo');
+      x.addEventListener('click', () => { team.splice(i, 1); store.set(TEAM_KEY, team); renderTeam(); });
+      m.append(pick, x); box.append(m);
+    });
+  }
+  $('btnSave').addEventListener('click', () => {
+    const code = D.encode(cfg);
+    if (team.includes(code)) return toast('Ya está en el equipo');
+    team = [code, ...team].slice(0, 24); store.set(TEAM_KEY, team); renderTeam(); toast('Guardado en el equipo');
+  });
+
+  window.addEventListener('hashchange', () => { const c = fromHash(); if (c && D.encode(c) !== D.encode(cfg)) { cfg = c; sync(); } });
+  renderTeam();
+  sync();
+})();
+</script>
+</body>
+</html>

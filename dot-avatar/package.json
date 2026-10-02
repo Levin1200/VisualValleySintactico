@@ -1,0 +1,17 @@
+{
+  "name": "dot-avatar",
+  "version": "1.0.0",
+  "description": "Personajes de puntos animados en SVG para agentes de IA: formas, expresiones, estados y exportación a SVG/PNG.",
+  "type": "module",
+  "main": "./src/dot-avatar.js",
+  "exports": {
+    ".": "./src/dot-avatar.js",
+    "./global": "./dist/dot-avatar.js"
+  },
+  "files": ["src", "dist", "README.md"],
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/"
+  },
+  "license": "MIT"
+}

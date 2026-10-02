@@ -11,7 +11,7 @@
   "files": ["src", "dist", "README.md"],
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test test/"
+    "test": "node --test test/*.test.mjs"
   },
   "license": "MIT"
 }

@@ -113,7 +113,7 @@ test('pieles: lisa, peludito y plástico', () => {
   assert.ok(!flat.includes('<defs>') && !flat.includes('filter='), 'la piel lisa no añade definiciones ni filtros');
   const plush = renderSVG({ skin: 'plush', shape: 'blob' });
   assert.ok(plush.includes('feTurbulence') && plush.includes('feDisplacementMap'), 'peludito lleva pelaje con ruido');
-  assert.equal((plush.match(/<animate attributeName="d"/g) || []).length, 2, 'el blob peludito se deforma con el pelo pegado');
+  assert.ok(!plush.includes('<animate'), 'el blob peludito no se deforma: el pelaje no se recalcula en cada cuadro');
   const plastic = renderSVG({ skin: 'plastic', shape: 'blob' });
   assert.ok(plastic.includes('clipPath') && plastic.includes('-gloss'), 'plástico lleva volumen y brillo recortado');
   assert.equal((plastic.match(/<animate attributeName="d"/g) || []).length, 3, 'el brillo sigue al blob deformándose');

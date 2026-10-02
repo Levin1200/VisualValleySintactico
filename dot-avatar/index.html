@@ -295,15 +295,29 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   $('pngSize').addEventListener('change', (e) => { prefs.png = +e.target.value; savePrefs(); });
   $('bg').addEventListener('change', (e) => { prefs.bg = e.target.value; savePrefs(); });
 
-  function set(patch) { cfg = D.normalize({ ...cfg, ...patch }); sync(); }
+  // agrupa los cambios (p. ej. al arrastrar una barrita) en un solo redibujado por cuadro
+  let pending = 0;
+  function set(patch) {
+    cfg = D.normalize({ ...cfg, ...patch });
+    if (!pending) pending = requestAnimationFrame(() => { pending = 0; sync(); });
+  }
   function savePrefs() { store.set(PREF_KEY, { ...prefs, cfg }); }
 
+  let tilesKey = '';
   function sync() {
     stage.update(cfg);
-    const mini = (patch) => D.renderSVG({ ...cfg, ...patch, state: 'idle' }, { animated: false });
-    for (const [k, b] of Object.entries(exprBtns)) { b.innerHTML = mini({ expression: k }); b.setAttribute('aria-pressed', k === cfg.expression); }
-    for (const [k, b] of Object.entries(shapeBtns)) { b.innerHTML = mini({ shape: k }); b.setAttribute('aria-pressed', k === cfg.shape); }
-    for (const [k, b] of Object.entries(skinBtns)) { b.innerHTML = mini({ skin: k }); b.setAttribute('aria-pressed', k === cfg.skin); }
+    // las miniaturas no dependen del estado ni de la velocidad: solo se redibujan si cambia lo demás
+    const key = D.encode({ ...cfg, state: 'idle', speed: 1 });
+    if (key !== tilesKey) {
+      tilesKey = key;
+      const mini = (patch) => D.renderSVG({ ...cfg, ...patch, state: 'idle' }, { animated: false });
+      for (const [k, b] of Object.entries(exprBtns)) b.innerHTML = mini({ expression: k });
+      for (const [k, b] of Object.entries(shapeBtns)) b.innerHTML = mini({ shape: k });
+      for (const [k, b] of Object.entries(skinBtns)) b.innerHTML = mini({ skin: k });
+    }
+    for (const [k, b] of Object.entries(exprBtns)) b.setAttribute('aria-pressed', k === cfg.expression);
+    for (const [k, b] of Object.entries(shapeBtns)) b.setAttribute('aria-pressed', k === cfg.shape);
+    for (const [k, b] of Object.entries(skinBtns)) b.setAttribute('aria-pressed', k === cfg.skin);
     for (const [k, b] of Object.entries(stateBtns)) b.setAttribute('aria-pressed', k === cfg.state);
     for (const [c, b] of Object.entries(swatches)) b.setAttribute('aria-pressed', c === cfg.color);
     $('colorPick').value = cfg.color; $('colorHex').value = cfg.color;
@@ -381,7 +395,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
       const pick = document.createElement('button');
       pick.type = 'button'; pick.style.cssText = 'display:block;width:100%;height:100%';
       pick.setAttribute('aria-label', 'Cargar personaje guardado'); pick.title = code;
-      pick.innerHTML = D.renderSVG(D.decode(code), { id: 'tm' + i });
+      pick.innerHTML = D.renderSVG(D.decode(code), { id: 'tm' + i, animated: false });
       pick.addEventListener('click', () => { cfg = D.decode(code); sync(); });
       const x = document.createElement('button');
       x.type = 'button'; x.className = 'x'; x.textContent = '×'; x.setAttribute('aria-label', 'Quitar del equipo');

@@ -92,7 +92,8 @@ Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 ## Detalles
 
 - Las pieles **peludito** y **plástico** usan filtros SVG: el volumen de cojín sale de una luz y una sombra interiores calculadas sobre la silueta, el pelaje de un ruido fino que deshilacha el borde y da grano, y el plástico añade un reflejo suave. Todo se mide en unidades del dibujo, así que se ve igual a cualquier tamaño y también en el PNG exportado.
-- Las formas, los ojos y los adornos son vectoriales. Las animaciones son CSS dentro del propio SVG, y la deformación del `blob` usa SMIL. Por eso el SVG exportado también se anima al usarlo en `<img>`.
+- Las formas, los ojos y los adornos son vectoriales.
+- En la página (`mount()` y `<dot-avatar>`) el avatar se dibuja en capas: la piel se pinta una sola vez y el movimiento del cuerpo lo hace el compositor del navegador, así que las pieles con filtros se animan a 60 fps. Al actualizarlo, la piel solo se vuelve a pintar si cambia algo que la afecte (forma, piel, color o velocidad). El blob peludito no se deforma, para no recalcular el pelaje en cada cuadro. Las animaciones son CSS dentro del propio SVG, y la deformación del `blob` usa SMIL. Por eso el SVG exportado también se anima al usarlo en `<img>`.
 - Cada avatar aísla su CSS con un prefijo propio, así que puedes tener muchos en la misma página sin conflictos.
 - Respeta `prefers-reduced-motion`.
 - El Lab guarda el diseño actual y tu equipo en `localStorage`, y el enlace de **Compartir** lleva el diseño en la URL (`#a=…`).

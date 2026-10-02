@@ -418,12 +418,15 @@ function extraMarkup(kind, accent, ink) {
   }
 }
 
-function css(id, st, speed) {
+function css(id, st, speed, html = false) {
   const S = (sec) => num(sec / speed) + 's';
   const p = `.${id}`;
+  // en el modo en capas el cuerpo es un <div> de 100 × 100 unidades: px del dibujo → %
+  const kf = html ? BODY_KEYFRAMES[st.body].replace(/(-?[\d.]+)px/g, '$1%') : BODY_KEYFRAMES[st.body];
+  const origin = html ? 'transform-origin:50% 82%' : 'transform-box:view-box;transform-origin:50px 82px';
   let out =
-    `${p} .da-body{transform-box:view-box;transform-origin:50px 82px;animation:${id}-body ${S(st.dur)} ease-in-out infinite}` +
-    `@keyframes ${id}-body{${BODY_KEYFRAMES[st.body]}}`;
+    `${p} .da-body{${origin};animation:${id}-body ${S(st.dur)} ease-in-out infinite}` +
+    `@keyframes ${id}-body{${kf}}`;
   if (st.blink) {
     out +=
       `${p} .da-eye{transform-box:fill-box;transform-origin:center;animation:${id}-blink ${S(4.6)} infinite}` +
@@ -479,42 +482,46 @@ function css(id, st, speed) {
  * @param {string}  [opts.title]          texto accesible
  */
 function renderSVG(cfg, opts = {}) {
+  const P = parts(cfg, opts);
+  const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"${size} class="${P.id}" role="img" aria-label="${P.title}">` +
+    (P.animated ? `<style>${css(P.id, P.st, P.c.speed)}</style>` : '') +
+    (P.defs ? `<defs>${P.defs}</defs>` : '') +
+    (opts.background ? `<rect width="100" height="100" fill="${opts.background}"/>` : '') +
+    `<g class="da-body">${P.skin}${P.face}</g>` +
+    P.fx +
+    `</svg>`
+  );
+}
+
+/** Piezas del avatar: piel (cuerpo), cara (mejillas y ojos) y adornos del estado. */
+function parts(cfg, opts = {}) {
   const c = normalize(cfg);
   const st = STATES[c.state];
   const animated = opts.animated !== false;
   const id = opts.id || hashId(encode(c));
   const ink = inkFor(c);
   const expr = EXPRESSIONS[st.eyes || c.expression];
-  const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
   const title = opts.title || `Avatar ${EXPRESSIONS[c.expression].label.toLowerCase()}, ${st.label.toLowerCase()}`;
 
+  // el pelaje es costoso de recalcular, así que el blob peludito no se deforma
   const d = shapePath(c.shape, 0);
   let morph = '';
-  if (animated && SHAPES[c.shape].morph) {
+  if (animated && SHAPES[c.shape].morph && c.skin !== 'plush') {
     const frames = [0, 1, 2, 3, 4, 5, 6].map((k) => shapePath(c.shape, (k / 6) * TAU));
     morph = `<animate attributeName="d" dur="${num(7 / c.speed)}s" repeatCount="indefinite" values="${frames.join(';')}"/>`;
   }
   const skin = skinBody(c, id, d, morph);
-  const shape = skin.body;
 
   // las mejillas acompañan a los ojos: debajo y un poco hacia afuera
   const chX = EYE.dx * c.eyeGap + 4.5, chY = num(57.5 + c.eyeY);
   const cheeks = expr.cheeks
     ? `<g fill="#FF6B8B" opacity=".45"><ellipse cx="${num(BODY.cx - chX)}" cy="${chY}" rx="4" ry="2.4"/><ellipse cx="${num(BODY.cx + chX)}" cy="${chY}" rx="4" ry="2.4"/></g>`
     : '';
+  const face = cheeks + `<g class="da-eyes">${eyeMarkup(expr.eyes[0], 'l', ink, c)}${eyeMarkup(expr.eyes[1], 'r', ink, c)}</g>`;
 
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"${size} class="${id}" role="img" aria-label="${title}">` +
-    (animated ? `<style>${css(id, st, c.speed)}</style>` : '') +
-    (skin.defs ? `<defs>${skin.defs}</defs>` : '') +
-    (opts.background ? `<rect width="100" height="100" fill="${opts.background}"/>` : '') +
-    `<g class="da-body">${shape}${cheeks}<g class="da-eyes">` +
-    eyeMarkup(expr.eyes[0], 'l', ink, c) +
-    eyeMarkup(expr.eyes[1], 'r', ink, c) +
-    `</g></g>` +
-    extraMarkup(st.extra, c.color, ink) +
-    `</svg>`
-  );
+  return { c, st, id, animated, title, defs: skin.defs, skin: skin.body, face, fx: extraMarkup(st.extra, c.color, ink) };
 }
 
 // ---------------------------------------------------------------------------
@@ -542,7 +549,15 @@ async function renderPNG(cfg, size = 512, opts = {}) {
 
 let counter = 0;
 
-/** Avatar vivo dentro de un elemento del DOM. */
+const layer = (cls, content, extra = '') =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="${cls}" aria-hidden="true" ` +
+  `style="position:absolute;inset:0;width:100%;height:100%;overflow:visible${extra}">${content}</svg>`;
+
+/**
+ * Avatar vivo dentro de un elemento del DOM. Se dibuja en capas: la piel va en su propia
+ * capa, que se pinta una sola vez, y el movimiento del cuerpo lo hace el compositor del
+ * navegador. Así las pieles con filtros (peludito, plástico) no se recalculan en cada cuadro.
+ */
 class Avatar {
   constructor(el, cfg = {}, opts = {}) {
     this.el = el;
@@ -552,7 +567,28 @@ class Avatar {
     this.render();
   }
   render() {
-    this.el.innerHTML = renderSVG(this.cfg, { ...this.opts, id: this.id });
+    const P = parts(this.cfg, { ...this.opts, id: this.id });
+    if (!this.root || !this.el.contains(this.root)) {
+      const size = this.opts.size ? `width:${this.opts.size}px;height:${this.opts.size}px` : 'width:100%;aspect-ratio:1/1';
+      this.el.innerHTML =
+        `<div class="${this.id}" role="img" style="position:relative;${size}"><style></style>` +
+        `<div class="da-body" style="position:absolute;inset:0"><div class="da-skin" style="position:absolute;inset:0;will-change:transform"></div>` +
+        layer('da-face', '') + `</div>` + layer('da-fx', '') + `</div>`;
+      this.root = this.el.firstChild;
+      this.skinKey = null;
+    }
+    const q = (sel) => this.root.querySelector(sel);
+    this.root.setAttribute('aria-label', P.title);
+    const style = P.animated ? css(P.id, P.st, P.c.speed, true) : '';
+    if (q('style').textContent !== style) q('style').textContent = style;
+    // la piel solo se vuelve a pintar si cambia algo que la afecte
+    const skinKey = [P.c.shape, P.c.skin, P.c.color, P.c.speed, P.animated].join('|');
+    if (skinKey !== this.skinKey) {
+      q('.da-skin').innerHTML = layer('', (P.defs ? `<defs>${P.defs}</defs>` : '') + P.skin);
+      this.skinKey = skinKey;
+    }
+    q('.da-face').innerHTML = P.face;
+    q('.da-fx').innerHTML = P.fx;
     return this;
   }
   update(patch) {
@@ -566,7 +602,7 @@ class Avatar {
   toSVG(opts) { return renderSVG(this.cfg, opts); }
   toPNG(size, opts) { return renderPNG(this.cfg, size, opts); }
   toCode() { return encode(this.cfg); }
-  destroy() { this.el.innerHTML = ''; }
+  destroy() { this.el.innerHTML = ''; this.root = null; }
 }
 
 function mount(el, cfg, opts) {
@@ -596,11 +632,11 @@ function defineElement(tag = 'dot-avatar') {
       return normalize({ ...base, ...own });
     }
     render() {
-      if (!this._id) this._id = `da-e${++counter}`;
       const size = parseFloat(this.getAttribute('size')) || 96;
       this.style.display = this.style.display || 'inline-block';
       this.style.width = this.style.height = size + 'px';
-      this.innerHTML = renderSVG(this.config, { id: this._id, size });
+      if (this._avatar) this._avatar.update(this.config);
+      else this._avatar = new Avatar(this, this.config);
     }
   }
   customElements.define(tag, DotAvatarElement);

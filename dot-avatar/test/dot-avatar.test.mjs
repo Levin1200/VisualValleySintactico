@@ -74,3 +74,28 @@ test('ids distintos aíslan el CSS de cada avatar', () => {
   assert.notEqual(id(a), id(b));
   assert.ok(shapePath('star').startsWith('M') && shapePath('star').endsWith('Z'));
 });
+
+test('ajustes de ojos: tamaño, separación y altura', () => {
+  const svg = renderSVG({ eyeSize: 1.4, eyeGap: 1.2, eyeY: -4 });
+  // ojo izquierdo: 50 - 10.5 × 1.2 = 37.4 ; altura 49 - 4 = 45
+  assert.ok(svg.includes('translate(37.4 45) scale(1.4)'), 'ojo izquierdo desplazado y escalado');
+  assert.ok(svg.includes('translate(62.6 45) scale(1.4)'), 'ojo derecho simétrico');
+  assert.ok(!renderSVG({}).includes('scale(1)'), 'sin escala cuando el tamaño es 1');
+  const cheeks = renderSVG({ expression: 'shy', eyeGap: 1.2, eyeY: -4 });
+  assert.ok(cheeks.includes('cx="32.9" cy="53.5"'), 'las mejillas siguen a los ojos');
+});
+
+test('los ajustes de ojos se limitan a su rango', () => {
+  const c = normalize({ eyeSize: 9, eyeGap: 0, eyeY: -40 });
+  assert.equal(c.eyeSize, 1.6); assert.equal(c.eyeGap, 0.5); assert.equal(c.eyeY, -8);
+  assert.equal(normalize({ eyeSize: '' }).eyeSize, 1);
+  assert.equal(normalize({ eyeY: 'abc' }).eyeY, 0);
+});
+
+test('el código guarda los ojos y sigue leyendo códigos antiguos', () => {
+  const cfg = { shape: 'round', expression: 'neutral', state: 'idle', color: '#01A2A8', eyeSize: 1.25, eyeGap: 0.8, eyeY: -2.5 };
+  assert.equal(encode(cfg), 'round.neutral.idle.01a2a8.auto.100.125.80.-25');
+  assert.deepEqual(decode(encode(cfg)), normalize(cfg));
+  assert.equal(encode({ eyeSize: 1.2 }), 'round.neutral.idle.01a2a8.auto.100.120');
+  assert.deepEqual(decode('clover.love.asleep.6918ce.light.150'), normalize({ shape: 'clover', expression: 'love', state: 'asleep', color: '#6918CE', ink: 'light', speed: 1.5 }));
+});

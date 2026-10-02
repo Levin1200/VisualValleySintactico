@@ -120,6 +120,16 @@ const DEFAULTS = Object.freeze({
   color: '#01A2A8',
   ink: 'auto',
   speed: 1,
+  eyeSize: 1,
+  eyeGap: 1,
+  eyeY: 0,
+});
+
+/** Límites de los ajustes de ojos (útiles para construir controles). */
+const EYE_RANGES = Object.freeze({
+  eyeSize: { min: 0.5, max: 1.6, step: 0.05, label: 'Tamaño' },
+  eyeGap: { min: 0.5, max: 1.6, step: 0.05, label: 'Separación' },
+  eyeY: { min: -8, max: 8, step: 0.5, label: 'Altura' },
 });
 
 const BODY_KEYFRAMES = {
@@ -161,6 +171,11 @@ function normColor(c) {
 function normalize(cfg = {}) {
   const pick = (v, table, d) => (v in table ? v : d);
   const speed = Number(cfg.speed);
+  const range = (key) => {
+    const v = cfg[key], n = Number(v), r = EYE_RANGES[key];
+    if (v == null || v === '' || !Number.isFinite(n)) return DEFAULTS[key];
+    return Math.round(Math.min(r.max, Math.max(r.min, n)) * 100) / 100;
+  };
   return {
     shape: pick(cfg.shape, SHAPES, DEFAULTS.shape),
     expression: pick(cfg.expression, EXPRESSIONS, DEFAULTS.expression),
@@ -168,6 +183,9 @@ function normalize(cfg = {}) {
     color: normColor(cfg.color) || DEFAULTS.color,
     ink: pick(cfg.ink, INKS, DEFAULTS.ink),
     speed: Number.isFinite(speed) && speed > 0 ? Math.min(4, Math.max(0.25, speed)) : DEFAULTS.speed,
+    eyeSize: range('eyeSize'),
+    eyeGap: range('eyeGap'),
+    eyeY: range('eyeY'),
   };
 }
 
@@ -188,17 +206,31 @@ function inkFor(cfg) {
   return luminance(c.color) > 0.4 ? '#1E1E24' : '#FFFFFF';
 }
 
-/** Código compacto y legible para compartir: forma.expresión.estado.color.tinta[.velocidad en %] */
+/**
+ * Código compacto y legible para compartir:
+ * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10]
+ * Los campos finales con su valor por defecto se omiten.
+ */
 function encode(cfg) {
   const c = normalize(cfg);
   const parts = [c.shape, c.expression, c.state, c.color.slice(1).toLowerCase(), c.ink];
-  if (c.speed !== 1) parts.push(String(Math.round(c.speed * 100)));
-  return parts.join('.');
+  const tail = [c.speed * 100, c.eyeSize * 100, c.eyeGap * 100, c.eyeY * 10].map(Math.round);
+  const defaults = [100, 100, 100, 0];
+  let n = tail.length;
+  while (n && tail[n - 1] === defaults[n - 1]) n--;
+  return parts.concat(tail.slice(0, n).map(String)).join('.');
 }
 
 function decode(code) {
-  const [shape, expression, state, color, ink, speed] = String(code || '').split('.');
-  return normalize({ shape, expression, state, color: color && '#' + color, ink, speed: speed ? Number(speed) / 100 : 1 });
+  const [shape, expression, state, color, ink, speed, size, gap, y] = String(code || '').split('.');
+  const scaled = (v, k, d) => (v ? Number(v) / k : d);
+  return normalize({
+    shape, expression, state, color: color && '#' + color, ink,
+    speed: scaled(speed, 100, 1),
+    eyeSize: scaled(size, 100, 1),
+    eyeGap: scaled(gap, 100, 1),
+    eyeY: scaled(y, 10, 0),
+  });
 }
 
 /** Avatar aleatorio; con la misma semilla siempre sale el mismo. */
@@ -258,12 +290,14 @@ function shapePath(shape, phase = 0) {
 // Render
 // ---------------------------------------------------------------------------
 
-function eyeMarkup(type, side, ink, body) {
+function eyeMarkup(type, side, ink, c) {
   const g = GLYPHS[type] || GLYPHS.dot;
-  const x = BODY.cx + (side === 'l' ? -EYE.dx : EYE.dx);
-  let inner = g.svg(ink, body);
+  const dx = EYE.dx * c.eyeGap;
+  const x = BODY.cx + (side === 'l' ? -dx : dx);
+  const scale = c.eyeSize !== 1 ? ` scale(${num(c.eyeSize)})` : '';
+  let inner = g.svg(ink, c.color);
   if (side === 'r' && g.mirror) inner = `<g transform="scale(-1 1)">${inner}</g>`;
-  return `<g transform="translate(${num(x)} ${EYE.y})"><g class="da-eye">${inner}</g></g>`;
+  return `<g transform="translate(${num(x)} ${num(EYE.y + c.eyeY)})${scale}"><g class="da-eye">${inner}</g></g>`;
 }
 
 function extraMarkup(kind, accent, ink) {
@@ -394,8 +428,10 @@ function renderSVG(cfg, opts = {}) {
   }
   shape += '</path>';
 
+  // las mejillas acompañan a los ojos: debajo y un poco hacia afuera
+  const chX = EYE.dx * c.eyeGap + 4.5, chY = num(57.5 + c.eyeY);
   const cheeks = expr.cheeks
-    ? `<g fill="#FF6B8B" opacity=".45"><ellipse cx="${BODY.cx - 15}" cy="57.5" rx="4" ry="2.4"/><ellipse cx="${BODY.cx + 15}" cy="57.5" rx="4" ry="2.4"/></g>`
+    ? `<g fill="#FF6B8B" opacity=".45"><ellipse cx="${num(BODY.cx - chX)}" cy="${chY}" rx="4" ry="2.4"/><ellipse cx="${num(BODY.cx + chX)}" cy="${chY}" rx="4" ry="2.4"/></g>`
     : '';
 
   return (
@@ -403,8 +439,8 @@ function renderSVG(cfg, opts = {}) {
     (animated ? `<style>${css(id, st, c.speed)}</style>` : '') +
     (opts.background ? `<rect width="100" height="100" fill="${opts.background}"/>` : '') +
     `<g class="da-body">${shape}${cheeks}<g class="da-eyes">` +
-    eyeMarkup(expr.eyes[0], 'l', ink, c.color) +
-    eyeMarkup(expr.eyes[1], 'r', ink, c.color) +
+    eyeMarkup(expr.eyes[0], 'l', ink, c) +
+    eyeMarkup(expr.eyes[1], 'r', ink, c) +
     `</g></g>` +
     extraMarkup(st.extra, c.color, ink) +
     `</svg>`
@@ -469,9 +505,14 @@ function mount(el, cfg, opts) {
   return new Avatar(node, cfg, opts);
 }
 
-const ATTRS = ['shape', 'expression', 'state', 'color', 'ink', 'speed', 'size', 'code'];
+// atributos de la etiqueta → clave de configuración
+const CFG_ATTRS = {
+  shape: 'shape', expression: 'expression', state: 'state', color: 'color', ink: 'ink', speed: 'speed',
+  'eye-size': 'eyeSize', 'eye-gap': 'eyeGap', 'eye-y': 'eyeY',
+};
+const ATTRS = [...Object.keys(CFG_ATTRS), 'size', 'code'];
 
-/** Registra la etiqueta <dot-avatar shape="round" color="#01A2A8" state="thinking" size="96">. */
+/** Registra la etiqueta <dot-avatar shape="round" color="#01A2A8" state="thinking" eye-size="1.2" size="96">. */
 function defineElement(tag = 'dot-avatar') {
   if (typeof HTMLElement === 'undefined' || typeof customElements === 'undefined' || customElements.get(tag)) return;
   class DotAvatarElement extends HTMLElement {
@@ -481,7 +522,7 @@ function defineElement(tag = 'dot-avatar') {
     get config() {
       const base = this.getAttribute('code') ? decode(this.getAttribute('code')) : {};
       const own = {};
-      for (const a of ATTRS.slice(0, 6)) if (this.hasAttribute(a)) own[a] = this.getAttribute(a);
+      for (const [attr, key] of Object.entries(CFG_ATTRS)) if (this.hasAttribute(attr)) own[key] = this.getAttribute(attr);
       return normalize({ ...base, ...own });
     }
     render() {
@@ -497,5 +538,5 @@ function defineElement(tag = 'dot-avatar') {
 
 defineElement();
 
-root.DotAvatar = { PALETTE, SHAPES, EXPRESSIONS, STATES, INKS, DEFAULTS, normalize, inkFor, encode, decode, random, shapePath, renderSVG, renderPNG, Avatar, mount, defineElement };
+root.DotAvatar = { PALETTE, SHAPES, EXPRESSIONS, STATES, INKS, DEFAULTS, EYE_RANGES, normalize, inkFor, encode, decode, random, shapePath, renderSVG, renderPNG, Avatar, mount, defineElement };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

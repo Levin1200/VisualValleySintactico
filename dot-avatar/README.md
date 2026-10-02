@@ -18,6 +18,8 @@ Personajes de puntos animados en SVG para darle cara a un agente de IA: 7 formas
 
 Para cambiar el estado desde tu código: `el.setAttribute('state', 'writing')`.
 
+Los ojos se ajustan con `eye-size`, `eye-gap` y `eye-y`: `<dot-avatar eye-size="1.3" eye-gap="0.8" eye-y="-2"></dot-avatar>`.
+
 También acepta el código que genera el Lab: `<dot-avatar code="blob.happy.thinking.01a2a8.auto"></dot-avatar>`.
 
 ### Con JavaScript
@@ -53,6 +55,9 @@ const png = await renderPNG(cfg, 512);                                          
 | `color` | cualquier hex (`#01A2A8`, `#abc`) | `#01A2A8` |
 | `ink` | `auto` (contraste automático), `dark`, `light` | `auto` |
 | `speed` | multiplicador de velocidad, de `0.25` a `4` | `1` |
+| `eyeSize` | tamaño de los ojos, de `0.5` a `1.6` | `1` |
+| `eyeGap` | separación entre los ojos, de `0.5` (juntos) a `1.6` (separados) | `1` |
+| `eyeY` | altura de los ojos, de `-8` (arriba) a `8` (abajo) | `0` |
 
 Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 
@@ -77,11 +82,11 @@ Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 - `Avatar`: `.update(patch)`, `.setState()`, `.setExpression()`, `.setShape()`, `.setColor()`, `.toSVG(opts)`, `.toPNG(size, opts)`, `.toCode()`, `.destroy()`
 - `renderSVG(cfg, { animated = true, size, background, id, title })` → `string`
 - `renderPNG(cfg, size = 512, { background })` → `Promise<Blob>`
-- `encode(cfg)` / `decode(code)`: código compartible `forma.expresión.estado.color.tinta[.velocidad%]`
+- `encode(cfg)` / `decode(code)`: código compartible `forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10]`. Los campos finales con su valor por defecto se omiten, y los códigos antiguos siguen funcionando.
 - `random(seed?)`: configuración aleatoria (determinista si pasas semilla)
 - `normalize(cfg)`, `inkFor(cfg)`, `shapePath(shape, fase)`
 - `defineElement(tag = 'dot-avatar')`: se llama sola al cargar en el navegador
-- Catálogos: `SHAPES`, `EXPRESSIONS`, `STATES`, `PALETTE`, `INKS`, `DEFAULTS`
+- Catálogos: `SHAPES`, `EXPRESSIONS`, `STATES`, `PALETTE`, `INKS`, `DEFAULTS`, `EYE_RANGES` (límites y pasos de los ajustes de ojos)
 
 ## Detalles
 

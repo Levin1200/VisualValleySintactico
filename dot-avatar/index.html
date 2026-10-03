@@ -270,7 +270,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   }
   for (const [k, v] of Object.entries(D.INKS)) $('ink').append(new Option(v, k));
 
-  // barritas de ojos: tamaño, alargado, separación y altura
+  // barritas de ojos: tamaño, alargado, redondeo, separación y altura
   const eyeInputs = {};
   for (const [k, r] of Object.entries(D.EYE_RANGES)) {
     const row = document.createElement('label');
@@ -285,7 +285,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   }
   const EYE_KEYS = Object.keys(D.EYE_RANGES);
   $('eyesReset').addEventListener('click', () => set(Object.fromEntries(EYE_KEYS.map((k) => [k, D.DEFAULTS[k]]))));
-  const eyeText = (k, v) => (k === 'eyeY' ? (v > 0 ? '+' : '') + v : '×' + v);
+  const eyeText = (k, v) => (k === 'eyeY' ? (v > 0 ? '+' : '') + v : k === 'eyeRound' ? Math.round(v * 100) + '%' : '×' + v);
 
   $('colorPick').addEventListener('input', (e) => set({ color: e.target.value }));
   $('colorHex').addEventListener('change', (e) => set({ color: e.target.value }));
@@ -343,6 +343,7 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
     if (cfg.speed !== 1) attrs.push(`speed="${cfg.speed}"`);
     if (cfg.eyeSize !== 1) attrs.push(`eye-size="${cfg.eyeSize}"`);
     if (cfg.eyeStretch !== 1) attrs.push(`eye-stretch="${cfg.eyeStretch}"`);
+    if (cfg.eyeRound !== 1) attrs.push(`eye-round="${cfg.eyeRound}"`);
     if (cfg.eyeGap !== 1) attrs.push(`eye-gap="${cfg.eyeGap}"`);
     if (cfg.eyeY !== 0) attrs.push(`eye-y="${cfg.eyeY}"`);
     return `<script src="dot-avatar.js"><\/script>\n<dot-avatar ${attrs.join(' ')} size="96"></dot-avatar>`;
@@ -381,8 +382,8 @@ pre{margin:12px 0 8px;padding:12px;border-radius:10px;background:var(--surface);
   $('btnShare').addEventListener('click', () => copyText(location.href, 'Enlace copiado'));
   $('btnCopyCode').addEventListener('click', actions.copyHtml);
   $('btnRandom').addEventListener('click', () => {
-    const { state, ink, speed, eyeSize, eyeStretch, eyeGap, eyeY } = cfg;   // conserva tus ajustes; cambia forma, expresión, color y piel
-    cfg = { ...D.random(), state, ink, speed, eyeSize, eyeStretch, eyeGap, eyeY };
+    const { state, ink, speed, eyeSize, eyeStretch, eyeRound, eyeGap, eyeY } = cfg;   // conserva tus ajustes; cambia forma, expresión, color y piel
+    cfg = { ...D.random(), state, ink, speed, eyeSize, eyeStretch, eyeRound, eyeGap, eyeY };
     sync();
   });
 

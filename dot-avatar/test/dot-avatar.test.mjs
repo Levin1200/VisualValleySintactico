@@ -103,6 +103,27 @@ test('ojos alargados: crecen en alto sin engrosar los trazos', () => {
   assert.equal(renderSVG({ eyeStretch: 1 }), renderSVG({}), 'sin alargar no cambia nada');
 });
 
+test('redondeo de los ojos: de óvalo a cápsula y a rectángulo', () => {
+  const eye = (cfg) => renderSVG(cfg).match(/<g class="da-eye">(.*?)<\/g><\/g>/)[1];
+  assert.equal(eye({ eyeRound: 0, eyeStretch: 2 }), '<rect x="-3.6" y="-7.2" width="7.2" height="14.4" rx="0" ry="0" fill="#FFFFFF"/>');
+  assert.ok(eye({ eyeRound: 0.75, eyeStretch: 2 }).includes('rx="3.6" ry="3.6"'), 'cápsula: esquinas de medio ancho');
+  assert.ok(eye({ eyeRound: 0.4 }).includes('rx="1.92" ry="1.92"'), 'rectángulo redondeado');
+  assert.ok(eye({ eyeRound: 0.95, eyeStretch: 2 }).includes('rx="3.6" ry="6.48"'), 'se acerca al óvalo sin saltos');
+  assert.ok(eye({ expression: 'dreamy', eyeRound: 0 }).includes('<circle class="da-hl" r="1.4"'), 'el brillo sigue redondo');
+  assert.ok(eye({ expression: 'surprised', eyeRound: 0.5 }).includes('fill="none" stroke='), 'los anillos se redondean como contorno');
+  assert.equal(eye({ expression: 'love', eyeRound: 0 }), eye({ expression: 'love' }), 'los ojos con forma propia no cambian');
+  for (const expression of Object.keys(EXPRESSIONS)) {
+    const svg = renderSVG({ expression, eyeRound: 0.3, eyeStretch: 1.7 });
+    assert.ok(!/NaN|undefined/.test(svg), expression);
+    balanced(svg);
+  }
+  assert.equal(renderSVG({ eyeRound: 1 }), renderSVG({}), 'sin redondeo propio no cambia nada');
+  assert.equal(normalize({ eyeRound: -3 }).eyeRound, 0);
+  assert.equal(encode({ eyeRound: 0.5 }), 'round.neutral.idle.01a2a8.auto.100.100.100.0.flat.100.50');
+  assert.equal(decode(encode({ eyeRound: 0.35, eyeStretch: 1.6 })).eyeRound, 0.35);
+  assert.equal(decode('round.neutral.idle.01a2a8.auto.100.100.100.0.flat.160').eyeRound, 1);
+});
+
 test('los ajustes de ojos se limitan a su rango', () => {
   const c = normalize({ eyeSize: 9, eyeGap: 0, eyeY: -40 });
   assert.equal(c.eyeSize, 1.6); assert.equal(c.eyeGap, 0.5); assert.equal(c.eyeY, -8);

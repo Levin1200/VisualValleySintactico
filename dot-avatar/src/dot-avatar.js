@@ -67,7 +67,8 @@ const GLYPHS = {
       `<path fill="${k}" d="M0 4.8C-1 3.9-5.4 1.1-5.4-1.8C-5.4-3.8-3.9-5.2-2.3-5.2C-1.2-5.2-.4-4.6 0-3.8C.4-4.6 1.2-5.2 2.3-5.2C3.9-5.2 5.4-3.8 5.4-1.8C5.4 1.1 1 3.9 0 4.8Z"/>`,
   },
   star: { svg: (k) => `<path fill="${k}" d="M0-5.4L1.5-1.5 5.4 0 1.5 1.5 0 5.4-1.5 1.5-5.4 0-1.5-1.5Z"/>` },
-  shine: { svg: (k, body) => `<circle r="4.4" fill="${k}"/><circle r="1.4" cx="1.5" cy="-1.5" fill="${body}"/>` },
+  // da-hl: el brillo, que sigue siendo redondo aunque el ojo se vuelva rectangular
+  shine: { svg: (k, body) => `<circle r="4.4" fill="${k}"/><circle class="da-hl" r="1.4" cx="1.5" cy="-1.5" fill="${body}"/>` },
   up: { svg: (k) => `<circle r="3.6" cy="-1.6" fill="${k}"/>` },
   side: { svg: (k) => `<circle r="3.6" cx="-1.8" fill="${k}"/>` },
 };
@@ -101,6 +102,34 @@ function stretchEye(svg, k) {
     .replace(/<circle ([^>]*?)\br="([^"]+)"/g, (_, a, r) => `<ellipse ${a}rx="${r}" ry="${r}"`)
     .replace(/\s(cy|ry)="([^"]+)"/g, (_, at, v) => ` ${at}="${num(Number(v) * k)}"`)
     .replace(/\sd="([^"]+)"/g, (_, d) => ` d="${stretchPath(d, k)}"`);
+}
+
+// en este punto del redondeo el ojo es una cápsula; por encima se va volviendo óvalo
+const PILL = 0.75;
+
+/** Radios de esquina de un ojo de w × h: 0 = rectángulo, PILL = cápsula, 1 = óvalo. */
+function cornerRadii(w, h, t) {
+  const m = Math.min(w, h) / 2;
+  if (t <= PILL) return [(t / PILL) * m, (t / PILL) * m];
+  const u = (t - PILL) / (1 - PILL);
+  return [m + (w / 2 - m) * u, m + (h / 2 - m) * u];
+}
+
+/**
+ * Cambia los ojos redondos por rectángulos redondeados. Un rectángulo con radios de esquina
+ * iguales a la mitad de su ancho y de su alto es una elipse, así que el paso es continuo.
+ */
+function roundEye(svg, t) {
+  if (t === 1) return svg;
+  return svg.replace(/<(circle|ellipse) ([^>]*?)\/>/g, (el, tag, a) => {
+    if (a.includes('da-hl')) return el;
+    const get = (n) => Number((a.match(new RegExp(`(?:^|\\s)${n}="([^"]+)"`)) || [0, 0])[1]);
+    const rx = get(tag === 'circle' ? 'r' : 'rx'), ry = get(tag === 'circle' ? 'r' : 'ry');
+    const [kx, ky] = cornerRadii(2 * rx, 2 * ry, t);
+    const rest = a.replace(/(?:^|\s)(?:r|rx|ry|cx|cy)="[^"]*"/g, '').trim();
+    return `<rect x="${num(get('cx') - rx)}" y="${num(get('cy') - ry)}" width="${num(2 * rx)}" height="${num(2 * ry)}" ` +
+      `rx="${num(kx)}" ry="${num(ky)}" ${rest}/>`;
+  });
 }
 
 export const EXPRESSIONS = {
@@ -158,6 +187,7 @@ export const DEFAULTS = Object.freeze({
   speed: 1,
   eyeSize: 1,
   eyeStretch: 1,
+  eyeRound: 1,
   eyeGap: 1,
   eyeY: 0,
 });
@@ -166,6 +196,7 @@ export const DEFAULTS = Object.freeze({
 export const EYE_RANGES = Object.freeze({
   eyeSize: { min: 0.5, max: 1.6, step: 0.05, label: 'Tamaño' },
   eyeStretch: { min: 0.5, max: 2.2, step: 0.05, label: 'Alargar' },
+  eyeRound: { min: 0, max: 1, step: 0.05, label: 'Redondeo' },
   eyeGap: { min: 0.5, max: 1.6, step: 0.05, label: 'Separación' },
   eyeY: { min: -8, max: 8, step: 0.5, label: 'Altura' },
 });
@@ -224,6 +255,7 @@ export function normalize(cfg = {}) {
     speed: Number.isFinite(speed) && speed > 0 ? Math.min(4, Math.max(0.25, speed)) : DEFAULTS.speed,
     eyeSize: range('eyeSize'),
     eyeStretch: range('eyeStretch'),
+    eyeRound: range('eyeRound'),
     eyeGap: range('eyeGap'),
     eyeY: range('eyeY'),
   };
@@ -248,22 +280,22 @@ export function inkFor(cfg) {
 
 /**
  * Código compacto y legible para compartir:
- * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel.alargarOjos%]
+ * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel.alargarOjos%.redondeoOjos%]
  * Los campos finales con su valor por defecto se omiten.
  */
 export function encode(cfg) {
   const c = normalize(cfg);
   const parts = [c.shape, c.expression, c.state, c.color.slice(1).toLowerCase(), c.ink];
   const tail = [c.speed * 100, c.eyeSize * 100, c.eyeGap * 100, c.eyeY * 10].map((v) => String(Math.round(v)))
-    .concat(c.skin, String(Math.round(c.eyeStretch * 100)));
-  const defaults = ['100', '100', '100', '0', 'flat', '100'];
+    .concat(c.skin, String(Math.round(c.eyeStretch * 100)), String(Math.round(c.eyeRound * 100)));
+  const defaults = ['100', '100', '100', '0', 'flat', '100', '100'];
   let n = tail.length;
   while (n && tail[n - 1] === defaults[n - 1]) n--;
   return parts.concat(tail.slice(0, n)).join('.');
 }
 
 export function decode(code) {
-  const [shape, expression, state, color, ink, speed, size, gap, y, skin, stretch] = String(code || '').split('.');
+  const [shape, expression, state, color, ink, speed, size, gap, y, skin, stretch, round] = String(code || '').split('.');
   const scaled = (v, k, d) => (v ? Number(v) / k : d);
   return normalize({
     shape, expression, state, color: color && '#' + color, ink,
@@ -273,6 +305,7 @@ export function decode(code) {
     eyeY: scaled(y, 10, 0),
     skin,
     eyeStretch: scaled(stretch, 100, 1),
+    eyeRound: scaled(round, 100, 1),
   });
 }
 
@@ -408,7 +441,7 @@ function eyeMarkup(type, side, ink, c) {
   const dx = EYE.dx * c.eyeGap;
   const x = BODY.cx + (side === 'l' ? -dx : dx);
   const scale = c.eyeSize !== 1 ? ` scale(${num(c.eyeSize)})` : '';
-  let inner = stretchEye(g.svg(ink, c.color), c.eyeStretch);
+  let inner = roundEye(stretchEye(g.svg(ink, c.color), c.eyeStretch), c.eyeRound);
   if (side === 'r' && g.mirror) inner = `<g transform="scale(-1 1)">${inner}</g>`;
   return `<g transform="translate(${num(x)} ${num(EYE.y + c.eyeY)})${scale}"><g class="da-eye">${inner}</g></g>`;
 }
@@ -648,7 +681,7 @@ export function mount(el, cfg, opts) {
 // atributos de la etiqueta → clave de configuración
 const CFG_ATTRS = {
   shape: 'shape', expression: 'expression', state: 'state', color: 'color', ink: 'ink', skin: 'skin', speed: 'speed',
-  'eye-size': 'eyeSize', 'eye-stretch': 'eyeStretch', 'eye-gap': 'eyeGap', 'eye-y': 'eyeY',
+  'eye-size': 'eyeSize', 'eye-stretch': 'eyeStretch', 'eye-round': 'eyeRound', 'eye-gap': 'eyeGap', 'eye-y': 'eyeY',
 };
 const ATTRS = [...Object.keys(CFG_ATTRS), 'size', 'code'];
 

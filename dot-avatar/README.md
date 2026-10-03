@@ -18,7 +18,7 @@ Personajes de puntos animados en SVG para darle cara a un agente de IA: 7 formas
 
 Para cambiar el estado desde tu código: `el.setAttribute('state', 'writing')`.
 
-Los ojos se ajustan con `eye-size`, `eye-stretch`, `eye-gap` y `eye-y`: `<dot-avatar eye-size="1.3" eye-stretch="1.6" eye-gap="0.8" eye-y="-2"></dot-avatar>`.
+Los ojos se ajustan con `eye-size`, `eye-stretch`, `eye-round`, `eye-gap` y `eye-y`: `<dot-avatar eye-size="1.3" eye-stretch="1.6" eye-round="0.5" eye-gap="0.8" eye-y="-2"></dot-avatar>`.
 
 También acepta el código que genera el Lab: `<dot-avatar code="blob.happy.thinking.01a2a8.auto"></dot-avatar>`.
 
@@ -58,6 +58,7 @@ const png = await renderPNG(cfg, 512);                                          
 | `speed` | multiplicador de velocidad, de `0.25` a `4` | `1` |
 | `eyeSize` | tamaño de los ojos, de `0.5` a `1.6` | `1` |
 | `eyeStretch` | alto de los ojos, de `0.5` (achatados) a `2.2` (alargados) | `1` |
+| `eyeRound` | redondeo de los ojos redondos: `1` óvalo, `0.75` cápsula, menos es rectángulo redondeado, `0` rectángulo | `1` |
 | `eyeGap` | separación entre los ojos, de `0.5` (juntos) a `1.6` (separados) | `1` |
 | `eyeY` | altura de los ojos, de `-8` (arriba) a `8` (abajo) | `0` |
 
@@ -84,7 +85,7 @@ Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 - `Avatar`: `.update(patch)`, `.setState()`, `.setExpression()`, `.setShape()`, `.setColor()`, `.toSVG(opts)`, `.toPNG(size, opts)`, `.toCode()`, `.destroy()`
 - `renderSVG(cfg, { animated = true, size, background, id, title })` → `string`
 - `renderPNG(cfg, size = 512, { background })` → `Promise<Blob>`
-- `encode(cfg)` / `decode(code)`: código compartible `forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel.alargarOjos%]`. Los campos finales con su valor por defecto se omiten, y los códigos antiguos siguen funcionando.
+- `encode(cfg)` / `decode(code)`: código compartible `forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel.alargarOjos%.redondeoOjos%]`. Los campos finales con su valor por defecto se omiten, y los códigos antiguos siguen funcionando.
 - `random(seed?)`: configuración aleatoria (determinista si pasas semilla)
 - `normalize(cfg)`, `inkFor(cfg)`, `shapePath(shape, fase)`
 - `defineElement(tag = 'dot-avatar')`: se llama sola al cargar en el navegador
@@ -95,6 +96,7 @@ Los valores no válidos vuelven al valor por defecto en lugar de fallar.
 - Las pieles **peludito** y **plástico** usan filtros SVG: el volumen de cojín sale de una luz y una sombra interiores calculadas sobre la silueta, el pelaje de un ruido fino que deshilacha el borde y da grano, y el plástico añade un reflejo suave. Todo se mide en unidades del dibujo, así que se ve igual a cualquier tamaño y también en el PNG exportado.
 - Las formas, los ojos y los adornos son vectoriales.
 - Los ojos alargados no se estiran como una imagen: se alarga su forma y los trazos conservan su grosor, así que una raya sigue siendo una raya y los arcos y corazones crecen en alto sin engordar.
+- El redondeo cambia los ojos redondos (puntos, óvalos y anillos) por rectángulos redondeados; el brillo de los ojos soñadores sigue redondo. Los ojos con forma propia (arcos, rayas, corazones, estrellas) no cambian.
 - En la página (`mount()` y `<dot-avatar>`) el avatar se dibuja en capas: la piel se pinta una sola vez y el movimiento del cuerpo lo hace el compositor del navegador, así que las pieles con filtros se animan a 60 fps. Al actualizarlo, la piel solo se vuelve a pintar si cambia algo que la afecte (forma, piel, color o velocidad). El blob peludito no se deforma, para no recalcular el pelaje en cada cuadro. Las animaciones son CSS dentro del propio SVG, y la deformación del `blob` usa SMIL. Por eso el SVG exportado también se anima al usarlo en `<img>`.
 - Cada avatar aísla su CSS con un prefijo propio, así que puedes tener muchos en la misma página sin conflictos.
 - Respeta `prefers-reduced-motion`.

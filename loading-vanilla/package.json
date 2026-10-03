@@ -1,0 +1,16 @@
+{
+  "name": "loading-vanilla",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Port a HTML/CSS/JS puro (sin React) de los spinners de loading-dev.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "loading-dev": "0.3.5"
+  },
+  "license": "MIT"
+}

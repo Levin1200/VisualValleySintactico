@@ -75,6 +75,37 @@ const GLYPHS = {
   side: { svg: (k) => `<circle r="3.6" cx="-1.8" fill="${k}"/>` },
 };
 
+// parámetros de cada comando de trazado; true marca las coordenadas verticales
+const PATH_Y = {
+  M: [0, 1], L: [0, 1], T: [0, 1], H: [0], V: [1], Q: [0, 1, 0, 1], S: [0, 1, 0, 1],
+  C: [0, 1, 0, 1, 0, 1], A: [0, 1, 0, 0, 0, 0, 1], Z: [],
+};
+
+/** Escala las coordenadas verticales de un trazado absoluto (y los radios verticales de sus arcos). */
+function stretchPath(d, k) {
+  let cmd = 'M', i = 0, out = '';
+  for (const t of d.match(/[MLHVCSQTAZ]|-?(?:\d*\.\d+|\d+\.?)/gi)) {
+    if (/[a-z]/i.test(t)) { cmd = t.toUpperCase(); i = 0; out += t; continue; }
+    const pat = PATH_Y[cmd];
+    const v = pat[i++ % pat.length] ? num(Number(t) * k) : t;
+    if (cmd === 'M' && i === 2) cmd = 'L';   // tras M, los pares implícitos son líneas
+    out += (/[\d.]$/.test(out) && v[0] !== '-' ? ' ' : '') + v;
+  }
+  return out;
+}
+
+/**
+ * Alarga un ojo en vertical moviendo su geometría, no escalándolo:
+ * así los trazos conservan su grosor y una raya sigue siendo una raya.
+ */
+function stretchEye(svg, k) {
+  if (k === 1) return svg;
+  return svg
+    .replace(/<circle ([^>]*?)\br="([^"]+)"/g, (_, a, r) => `<ellipse ${a}rx="${r}" ry="${r}"`)
+    .replace(/\s(cy|ry)="([^"]+)"/g, (_, at, v) => ` ${at}="${num(Number(v) * k)}"`)
+    .replace(/\sd="([^"]+)"/g, (_, d) => ` d="${stretchPath(d, k)}"`);
+}
+
 const EXPRESSIONS = {
   neutral: { label: 'Neutral', eyes: ['dot', 'dot'] },
   calm: { label: 'Tranquilo', eyes: ['oval', 'oval'] },
@@ -129,6 +160,7 @@ const DEFAULTS = Object.freeze({
   skin: 'flat',
   speed: 1,
   eyeSize: 1,
+  eyeStretch: 1,
   eyeGap: 1,
   eyeY: 0,
 });
@@ -136,6 +168,7 @@ const DEFAULTS = Object.freeze({
 /** Límites de los ajustes de ojos (útiles para construir controles). */
 const EYE_RANGES = Object.freeze({
   eyeSize: { min: 0.5, max: 1.6, step: 0.05, label: 'Tamaño' },
+  eyeStretch: { min: 0.5, max: 2.2, step: 0.05, label: 'Alargar' },
   eyeGap: { min: 0.5, max: 1.6, step: 0.05, label: 'Separación' },
   eyeY: { min: -8, max: 8, step: 0.5, label: 'Altura' },
 });
@@ -193,6 +226,7 @@ function normalize(cfg = {}) {
     skin: pick(cfg.skin, SKINS, DEFAULTS.skin),
     speed: Number.isFinite(speed) && speed > 0 ? Math.min(4, Math.max(0.25, speed)) : DEFAULTS.speed,
     eyeSize: range('eyeSize'),
+    eyeStretch: range('eyeStretch'),
     eyeGap: range('eyeGap'),
     eyeY: range('eyeY'),
   };
@@ -217,21 +251,22 @@ function inkFor(cfg) {
 
 /**
  * Código compacto y legible para compartir:
- * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel]
+ * forma.expresión.estado.color.tinta[.velocidad%.tamañoOjos%.separaciónOjos%.alturaOjos×10.piel.alargarOjos%]
  * Los campos finales con su valor por defecto se omiten.
  */
 function encode(cfg) {
   const c = normalize(cfg);
   const parts = [c.shape, c.expression, c.state, c.color.slice(1).toLowerCase(), c.ink];
-  const tail = [c.speed * 100, c.eyeSize * 100, c.eyeGap * 100, c.eyeY * 10].map((v) => String(Math.round(v))).concat(c.skin);
-  const defaults = ['100', '100', '100', '0', 'flat'];
+  const tail = [c.speed * 100, c.eyeSize * 100, c.eyeGap * 100, c.eyeY * 10].map((v) => String(Math.round(v)))
+    .concat(c.skin, String(Math.round(c.eyeStretch * 100)));
+  const defaults = ['100', '100', '100', '0', 'flat', '100'];
   let n = tail.length;
   while (n && tail[n - 1] === defaults[n - 1]) n--;
   return parts.concat(tail.slice(0, n)).join('.');
 }
 
 function decode(code) {
-  const [shape, expression, state, color, ink, speed, size, gap, y, skin] = String(code || '').split('.');
+  const [shape, expression, state, color, ink, speed, size, gap, y, skin, stretch] = String(code || '').split('.');
   const scaled = (v, k, d) => (v ? Number(v) / k : d);
   return normalize({
     shape, expression, state, color: color && '#' + color, ink,
@@ -240,6 +275,7 @@ function decode(code) {
     eyeGap: scaled(gap, 100, 1),
     eyeY: scaled(y, 10, 0),
     skin,
+    eyeStretch: scaled(stretch, 100, 1),
   });
 }
 
@@ -375,7 +411,7 @@ function eyeMarkup(type, side, ink, c) {
   const dx = EYE.dx * c.eyeGap;
   const x = BODY.cx + (side === 'l' ? -dx : dx);
   const scale = c.eyeSize !== 1 ? ` scale(${num(c.eyeSize)})` : '';
-  let inner = g.svg(ink, c.color);
+  let inner = stretchEye(g.svg(ink, c.color), c.eyeStretch);
   if (side === 'r' && g.mirror) inner = `<g transform="scale(-1 1)">${inner}</g>`;
   return `<g transform="translate(${num(x)} ${num(EYE.y + c.eyeY)})${scale}"><g class="da-eye">${inner}</g></g>`;
 }
@@ -515,7 +551,8 @@ function parts(cfg, opts = {}) {
   const skin = skinBody(c, id, d, morph);
 
   // las mejillas acompañan a los ojos: debajo y un poco hacia afuera
-  const chX = EYE.dx * c.eyeGap + 4.5, chY = num(57.5 + c.eyeY);
+  // y bajan lo que crece la mitad inferior de un ojo alargado
+  const chX = EYE.dx * c.eyeGap + 4.5, chY = num(57.5 + c.eyeY + Math.max(0, c.eyeStretch - 1) * 3.6 * c.eyeSize);
   const cheeks = expr.cheeks
     ? `<g fill="#FF6B8B" opacity=".45"><ellipse cx="${num(BODY.cx - chX)}" cy="${chY}" rx="4" ry="2.4"/><ellipse cx="${num(BODY.cx + chX)}" cy="${chY}" rx="4" ry="2.4"/></g>`
     : '';
@@ -614,7 +651,7 @@ function mount(el, cfg, opts) {
 // atributos de la etiqueta → clave de configuración
 const CFG_ATTRS = {
   shape: 'shape', expression: 'expression', state: 'state', color: 'color', ink: 'ink', skin: 'skin', speed: 'speed',
-  'eye-size': 'eyeSize', 'eye-gap': 'eyeGap', 'eye-y': 'eyeY',
+  'eye-size': 'eyeSize', 'eye-stretch': 'eyeStretch', 'eye-gap': 'eyeGap', 'eye-y': 'eyeY',
 };
 const ATTRS = [...Object.keys(CFG_ATTRS), 'size', 'code'];
 

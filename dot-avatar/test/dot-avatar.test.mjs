@@ -86,11 +86,30 @@ test('ajustes de ojos: tamaño, separación y altura', () => {
   assert.ok(cheeks.includes('cx="32.9" cy="53.5"'), 'las mejillas siguen a los ojos');
 });
 
+test('ojos alargados: crecen en alto sin engrosar los trazos', () => {
+  const tall = renderSVG({ eyeStretch: 2 });
+  assert.ok(tall.includes('<ellipse rx="3.6" ry="7.2"'), 'el punto se vuelve un óvalo alto');
+  const line = renderSVG({ expression: 'focused', eyeStretch: 2 });
+  assert.ok(line.includes('d="M-4.2 0H4.2"'), 'una raya sigue siendo una raya');
+  assert.ok(!/stroke-width="(?!3")/.test(line), 'el grosor del trazo no cambia');
+  assert.ok(renderSVG({ expression: 'happy', eyeStretch: 2 }).includes('d="M-4.2 4Q0-8 4.2 4"'), 'los arcos se alargan');
+  assert.ok(renderSVG({ expression: 'dreamy', eyeStretch: 1.5 }).includes('ry="2.1" cx="1.5" cy="-2.25"'), 'el brillo acompaña al ojo');
+  assert.ok(renderSVG({ expression: 'shy', eyeStretch: 2 }).includes('cy="61.1"'), 'las mejillas bajan con el ojo');
+  for (const expression of Object.keys(EXPRESSIONS)) {
+    const svg = renderSVG({ expression, eyeStretch: 2.2, eyeSize: 1.6 });
+    assert.ok(!/NaN|undefined/.test(svg), expression);
+    balanced(svg);
+  }
+  assert.equal(renderSVG({ eyeStretch: 1 }), renderSVG({}), 'sin alargar no cambia nada');
+});
+
 test('los ajustes de ojos se limitan a su rango', () => {
   const c = normalize({ eyeSize: 9, eyeGap: 0, eyeY: -40 });
   assert.equal(c.eyeSize, 1.6); assert.equal(c.eyeGap, 0.5); assert.equal(c.eyeY, -8);
   assert.equal(normalize({ eyeSize: '' }).eyeSize, 1);
   assert.equal(normalize({ eyeY: 'abc' }).eyeY, 0);
+  assert.equal(normalize({ eyeStretch: 5 }).eyeStretch, 2.2);
+  assert.equal(normalize({ eyeStretch: 0.1 }).eyeStretch, 0.5);
 });
 
 test('el código guarda los ojos y sigue leyendo códigos antiguos', () => {
@@ -126,4 +145,11 @@ test('la piel viaja en el código compartible', () => {
   assert.equal(decode(encode({ skin: 'plastic', eyeSize: 1.2 })).skin, 'plastic');
   assert.equal(decode('round.neutral.idle.01a2a8.auto').skin, 'flat');
   assert.equal(normalize({ skin: 'metal' }).skin, 'flat');
+});
+
+test('el alargado de los ojos viaja en el código compartible', () => {
+  assert.equal(encode({ eyeStretch: 1.6 }), 'round.neutral.idle.01a2a8.auto.100.100.100.0.flat.160');
+  assert.equal(encode({ skin: 'plush', eyeStretch: 1 }), 'round.neutral.idle.01a2a8.auto.100.100.100.0.plush');
+  assert.equal(decode(encode({ skin: 'plastic', eyeStretch: 1.75 })).eyeStretch, 1.75);
+  assert.equal(decode('round.neutral.idle.01a2a8.auto.100.120').eyeStretch, 1);
 });

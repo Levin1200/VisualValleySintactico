@@ -115,7 +115,7 @@ needle build --lora modelos/adaptador.safetensors --layers 8 --platform android-
 
 ## Resultados de este ejemplo
 
-Entrenado en un servidor sin tarjeta gráfica (4 núcleos, 15 GB): **una época** con los 900 ejemplos (113 pasos, ~1 h 40 min), lotes de 8 y `--lr 3e-4`. La pérdida bajó de 0.86 a entre 0.10 y 0.16. Se midió con las 200 frases de prueba, que usan palabras y nombres que el modelo nunca vio.
+Entrenado en un servidor sin tarjeta gráfica (4 núcleos, 15 GB): **una época** con los 900 ejemplos (113 pasos, ~1 h 40 min), lotes de 8 y `--lr 3e-4`. La pérdida bajó de 0.50 en los primeros pasos a 0.16 al final de la época (registro en `resultados/entrenamiento.txt`). Se midió con las 200 frases de prueba, que usan palabras y nombres que el modelo nunca vio.
 
 | | Modelo base | Ajustado |
 |---|---|---|

@@ -1,0 +1,67 @@
+  backend   cpu  float32
+  depth     20 layers
+  data      900 examples  seq_len 768  cap 768
+  numerics  CQ W4 STE + A8 (matches export)
+  lora      rank 16  alpha 32  5 weight groups
+  schedule  113 steps  warmup 5  cosine decay  clip 1.0  (compiling...)
+  step      2/113  loss 0.5049
+  step      4/113  loss 0.4897
+  step      6/113  loss 0.4388
+  step      8/113  loss 0.5082
+  step      10/113  loss 0.5121
+  step      12/113  loss 0.4276
+  step      14/113  loss 0.3815
+  step      16/113  loss 0.4200
+  step      18/113  loss 0.4882
+  step      20/113  loss 0.3015
+  step      22/113  loss 0.2771
+  step      24/113  loss 0.2655
+  step      26/113  loss 0.3295
+  step      28/113  loss 0.5480
+  step      30/113  loss 0.2043
+  step      32/113  loss 0.2228
+  step      34/113  loss 0.2376
+  step      36/113  loss 0.3232
+  step      38/113  loss 0.1338
+  step      40/113  loss 0.2763
+  step      42/113  loss 0.2366
+  step      44/113  loss 0.3294
+  step      46/113  loss 0.2876
+  step      48/113  loss 0.1803
+  step      50/113  loss 0.1037
+  step      52/113  loss 0.1124
+  step      54/113  loss 0.1231
+  step      56/113  loss 0.1615
+  step      58/113  loss 0.1426
+  step      60/113  loss 0.5550
+  step      62/113  loss 0.2747
+  step      64/113  loss 0.1316
+  step      66/113  loss 0.2868
+  step      68/113  loss 0.1234
+  step      70/113  loss 0.2203
+  step      72/113  loss 0.1874
+  step      74/113  loss 0.1635
+  step      76/113  loss 0.1606
+  step      78/113  loss 0.1673
+  step      80/113  loss 0.1236
+  step      82/113  loss 0.1090
+  step      84/113  loss 0.1435
+  step      86/113  loss 0.1796
+  step      88/113  loss 0.1282
+  step      90/113  loss 0.1416
+  step      92/113  loss 0.1619
+  step      94/113  loss 0.1331
+  step      96/113  loss 0.1546
+  step      98/113  loss 0.1873
+  step      100/113  loss 0.2165
+  step      102/113  loss 0.0815
+  step      104/113  loss 0.0914
+  step      106/113  loss 0.3823
+  step      108/113  loss 0.1938
+  step      110/113  loss 0.1617
+  step      112/113  loss 0.1306
+  epoch     1/1  loss 0.1604
+  adapter   modelos/adaptador.safetensors
+  next      needle build checkpoints/needle3.safetensors --lora modelos/adaptador.safetensors
+  note      local tuning leaves the confidence head untrained; needle build drops it and confidence reports None
+terminó con código 0

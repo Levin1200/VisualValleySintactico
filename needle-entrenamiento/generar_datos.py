@@ -12,10 +12,12 @@ modelo generaliza en vez de memorizar.
 
     python generar_datos.py                  # escribe datos/entrenamiento.jsonl y datos/prueba.jsonl
     python generar_datos.py --cantidad 1500  # más ejemplos de entrenamiento
+    python generar_datos.py --sin-tildes     # frases sin tildes (úsalo si tu app también las quita)
 """
 import argparse
 import json
 import random
+import unicodedata
 from pathlib import Path
 
 from herramientas import schemas
@@ -272,11 +274,24 @@ def generar(n, split, seed):
     return filas
 
 
+def sin_tildes(valor):
+    """Quita tildes de textos, también dentro de listas y diccionarios (las respuestas)."""
+    if isinstance(valor, str):
+        return "".join(c for c in unicodedata.normalize("NFD", valor) if unicodedata.category(c) != "Mn")
+    if isinstance(valor, list):
+        return [sin_tildes(v) for v in valor]
+    if isinstance(valor, dict):
+        return {k: sin_tildes(v) for k, v in valor.items()}
+    return valor
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--cantidad", type=int, default=900, help="ejemplos de entrenamiento")
     ap.add_argument("--prueba", type=int, default=200, help="ejemplos de prueba")
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--sin-tildes", action="store_true",
+                    help="quita las tildes de frases, razonamientos y respuestas (no de los esquemas)")
     args = ap.parse_args()
 
     carpeta = Path(__file__).with_name("datos")
@@ -286,6 +301,8 @@ def main():
         ruta = carpeta / f"{nombre}.jsonl"
         with ruta.open("w", encoding="utf-8") as f:
             for r in filas:
+                if args.sin_tildes:
+                    r = {**r, **{k: sin_tildes(r[k]) for k in ("query", "reasoning", "answers")}}
                 f.write(json.dumps(r, ensure_ascii=False) + "\n")
         cuenta = {}
         for r in filas:

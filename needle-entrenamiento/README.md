@@ -102,8 +102,10 @@ from herramientas import TOOLS
 agente = needle.Needle(tools=TOOLS, weights="modelos/ajustado.cact")
 respuesta = agente.complete("mandale 250 varos a mi mamá")
 respuesta["function_calls"]
-# [{'name': 'send_money', 'arguments': {'amount': 250.0, 'recipient': 'mi mamá', 'currency': 'GTQ'}}]
+# [{'name': 'send_money', 'arguments': {'recipient': 'mi mamá', 'amount': 250.0, 'currency': 'GTQ'}}]
 ```
+
+Si `function_calls` viene vacío pero `suppressed_calls` trae algo, el motor tenía una llamada pero no se atrevió a ejecutarla. En vez de descartarla, tu app puede **proponerla**: «¿Querés bloquear tu tarjeta de débito?».
 
 Para un teléfono u otro dispositivo, `needle build` también recorta el modelo y descarga el motor de esa plataforma:
 
@@ -113,7 +115,33 @@ needle build --lora modelos/adaptador.safetensors --layers 8 --platform android-
 
 ## Resultados de este ejemplo
 
-RESULTADOS
+Entrenado en un servidor sin tarjeta gráfica (4 núcleos, 15 GB): **una época** con los 900 ejemplos (113 pasos, ~1 h 40 min), lotes de 8 y `--lr 3e-4`. La pérdida bajó de 0.86 a entre 0.10 y 0.16. Se midió con las 200 frases de prueba, que usan palabras y nombres que el modelo nunca vio.
+
+| | Modelo base | Ajustado |
+|---|---|---|
+| **Directas** (el motor ejecuta la llamada) | 46.5 % | **61.0 %** |
+| **Con confirmación** (más las retenidas correctas que la app propone) | 56.0 % | **70.0 %** |
+
+| Categoría (directas) | Base | Ajustado |
+|---|---|---|
+| Recargas de saldo | 6 % | **52 %** |
+| Pago de servicios | 21 % | **58 %** |
+| Envíos de dinero | 57 % | **64 %** |
+| Fuera de tema (no llamar nada) | 88 % | **92 %** |
+| Varias acciones en una frase | 21 % | 26 % |
+| Consultar saldo | 82 % | 82 % |
+| Pedidos incompletos | 100 % | 100 % |
+| Negaciones | 88 % | 62 % |
+| Bloquear tarjeta | 0 % | 0 % |
+
+Lo que aprendimos de los errores:
+
+- **El motor exige que los valores de las listas aparezcan tal cual en la frase, tildes incluidas.** En «bloqueá mi tarjeta de débito» el modelo acierta `debito`, pero el motor la retiene porque la frase dice «débito». Pasa igual con «cheques» → `monetaria`, «wifi» → `internet` o «EEGSA» → `luz`. Entrenar no lo arregla; hay que diseñar las listas con las palabras que usa la gente.
+- **Quitar las tildes de la frase** antes de enviarla sube «bloquear tarjeta» de 0 % a 100 %. Pero como este modelo se entrenó con tildes, los envíos bajan de 64 % a 43 %. Si vas a quitarlas, quítalas también en los datos: `python generar_datos.py --sin-tildes`. Esa combinación no la probé por el tiempo que toma entrenar en CPU.
+- **Las negaciones empeoraron** (88 % → 62 %): solo había 24 de 900 ejemplos. Hacen falta más.
+- Es **una sola época**. Con 10 épocas en GPU y frases reales de tus usuarios debería mejorar bastante más.
+
+Las mediciones completas están en `resultados/`.
 
 ## Consejos para los datos
 

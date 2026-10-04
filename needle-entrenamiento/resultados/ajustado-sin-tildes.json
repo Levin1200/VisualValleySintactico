@@ -1,42 +1,42 @@
 {
-  "modelo": "modelo base",
-  "directas": 93,
-  "con_confirmacion": 112,
+  "modelo": "ajustado.cact · sin tildes",
+  "directas": 113,
+  "con_confirmacion": 124,
   "total": 200,
   "categorias": {
     "fuera": {
-      "directas": 22,
-      "con_confirmacion": 22,
+      "directas": 23,
+      "con_confirmacion": 23,
       "total": 25
     },
     "send_money": {
-      "directas": 40,
-      "con_confirmacion": 45,
+      "directas": 30,
+      "con_confirmacion": 34,
       "total": 70
     },
     "block_card": {
-      "directas": 0,
-      "con_confirmacion": 4,
+      "directas": 6,
+      "con_confirmacion": 6,
       "total": 6
     },
     "negada": {
-      "directas": 7,
-      "con_confirmacion": 7,
+      "directas": 4,
+      "con_confirmacion": 4,
       "total": 8
     },
     "pay_bill": {
-      "directas": 5,
+      "directas": 13,
       "con_confirmacion": 13,
       "total": 24
     },
     "buy_airtime": {
-      "directas": 2,
-      "con_confirmacion": 3,
+      "directas": 18,
+      "con_confirmacion": 23,
       "total": 33
     },
     "multiple": {
-      "directas": 4,
-      "con_confirmacion": 5,
+      "directas": 6,
+      "con_confirmacion": 8,
       "total": 19
     },
     "check_balance": {

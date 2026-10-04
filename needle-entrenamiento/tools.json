@@ -1,0 +1,128 @@
+[
+  {
+    "name": "send_money",
+    "description": "Send money to a person. GTQ is quetzales (Q, pisto, varos); USD is dollars.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "the amount of money to send",
+          "maximum": 100000,
+          "exclusiveMinimum": 0
+        },
+        "recipient": {
+          "type": "string",
+          "description": "the person who receives the money, as the user said it"
+        },
+        "currency": {
+          "type": "string",
+          "enum": [
+            "GTQ",
+            "USD"
+          ],
+          "default": "GTQ"
+        }
+      },
+      "required": [
+        "amount",
+        "recipient"
+      ]
+    }
+  },
+  {
+    "name": "check_balance",
+    "description": "Show the balance of a bank account: ahorro (savings) or monetaria (checking).",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string",
+          "enum": [
+            "ahorro",
+            "monetaria"
+          ]
+        }
+      },
+      "required": [
+        "account"
+      ]
+    }
+  },
+  {
+    "name": "pay_bill",
+    "description": "Pay a utility bill: luz (electricity, EEGSA, Energuate), agua (water, Empagua), telefono or internet.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "type": "string",
+          "enum": [
+            "luz",
+            "agua",
+            "telefono",
+            "internet"
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "description": "the amount to pay, only if the user says it",
+          "maximum": 100000,
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "service"
+      ]
+    }
+  },
+  {
+    "name": "buy_airtime",
+    "description": "Top up prepaid phone credit (recarga, saldo) on Tigo or Claro.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "the top-up amount",
+          "maximum": 1000,
+          "exclusiveMinimum": 0
+        },
+        "carrier": {
+          "type": "string",
+          "enum": [
+            "tigo",
+            "claro"
+          ]
+        },
+        "phone": {
+          "type": "string",
+          "description": "the phone number, e.g. 5555-1234, only if the user says it"
+        }
+      },
+      "required": [
+        "amount",
+        "carrier"
+      ]
+    }
+  },
+  {
+    "name": "block_card",
+    "description": "Block a lost or stolen card: debito (debit) or credito (credit).",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "card": {
+          "type": "string",
+          "enum": [
+            "debito",
+            "credito"
+          ]
+        }
+      },
+      "required": [
+        "card"
+      ]
+    }
+  }
+]

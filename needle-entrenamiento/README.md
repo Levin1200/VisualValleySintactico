@@ -1,0 +1,133 @@
+# Entrenar Needle 3 con tus funciones
+
+Kit para afinar [Needle 3](https://huggingface.co/Cactus-Compute/needle3), el modelo de 121M de Cactus Compute que convierte frases en llamadas a funciones, para que entienda **tus** funciones y el español de **tus** usuarios.
+
+El ejemplo es un asistente bancario guatemalteco con 5 funciones: enviar dinero, ver saldo, pagar servicios, recargar saldo y bloquear tarjetas. Cámbialas por las tuyas.
+
+## Cómo funciona
+
+Afinar no reentrena el modelo completo. Se entrena un **adaptador LoRA** pequeño encima del modelo base, que queda congelado, y luego se mezcla con él en un solo archivo `.cact`. Corre en tu computadora: CPU, GPU NVIDIA o Mac con Apple Silicon.
+
+```
+herramientas.py ──► tools.json ──► generar_datos.py ──► datos/entrenamiento.jsonl
+                                                            │
+                                needle finetune ◄───────────┘
+                                      │
+                                      ▼
+                     modelos/adaptador.safetensors ──► needle build ──► modelos/ajustado.cact
+```
+
+## Requisitos
+
+```sh
+pip install "cactus-needle[train]"          # CPU
+pip install "cactus-needle[train,gpu]"      # GPU NVIDIA
+pip install "cactus-needle[train,metal]"    # Mac con Apple Silicon
+```
+
+## Pasos
+
+### 1. Define tus funciones (`herramientas.py`)
+
+Reglas de Cactus que más importan:
+
+- **Una función por acción.** `pay_bill(service)` y `block_card(card)` funcionan mejor que una sola `hacer_operacion(tipo, valor)`.
+- **Cada argumento sale de lo que dijo el usuario.** Si un dato puede faltar, dale un valor por defecto (como la moneda, que por defecto es GTQ). Si es obligatorio y falta, el modelo no adivina: devuelve `[]` y tu app pregunta.
+- **Listas cerradas con `Literal`** y rangos con `Field(ge=..., le=...)`. El modelo no puede salirse de ellos.
+- **Cinco funciones o menos por turno.** Con más, Needle solo ve las cinco más parecidas a la frase.
+- Nombres y descripciones en inglés; los valores de las listas pueden estar en español (`"luz"`, `"agua"`).
+
+```sh
+python herramientas.py          # escribe tools.json
+```
+
+### 2. Crea los datos (`generar_datos.py`)
+
+Cada ejemplo es una línea JSON:
+
+```json
+{"query": "pagá la luz, son 350", "tools": [...],
+ "answers": [{"name": "pay_bill", "arguments": {"service": "luz", "amount": 350}}],
+ "reasoning": "'350' -> amount 350; 'la luz' -> service luz"}
+```
+
+El script arma los ejemplos con plantillas de frases y valores (nombres, montos en «Q250», «250 varos», «cien quetzales», operadoras, servicios). **Cambia las plantillas por frases reales de tus usuarios**: es lo que más mejora el resultado.
+
+```sh
+python generar_datos.py                    # 900 de entrenamiento + 200 de prueba
+python generar_datos.py --cantidad 2000    # más ejemplos
+```
+
+La prueba usa frases y nombres que no están en el entrenamiento, para medir si el modelo aprendió de verdad o solo memorizó.
+
+### 3. Mide el modelo base
+
+```sh
+python evaluar.py
+```
+
+### 4. Entrena y construye
+
+```sh
+needle finetune datos/entrenamiento.jsonl --epochs 10 --out modelos/adaptador.safetensors
+needle build --lora modelos/adaptador.safetensors --out modelos/ajustado.cact
+```
+
+O todo junto: `./entrenar.sh`.
+
+### 5. Mide el modelo ajustado
+
+```sh
+python evaluar.py --pesos modelos/ajustado.cact --errores 20
+```
+
+### 6. Úsalo en tu app
+
+```python
+import needle
+from herramientas import TOOLS
+
+agente = needle.Needle(tools=TOOLS, weights="modelos/ajustado.cact")
+respuesta = agente.complete("mandale 250 varos a mi mamá")
+respuesta["function_calls"]
+# [{'name': 'send_money', 'arguments': {'amount': 250.0, 'recipient': 'mi mamá', 'currency': 'GTQ'}}]
+```
+
+Para un teléfono u otro dispositivo, `needle build` también recorta el modelo y descarga el motor de esa plataforma:
+
+```sh
+needle build --lora modelos/adaptador.safetensors --layers 8 --platform android-arm64 --out ./android
+```
+
+## Resultados de este ejemplo
+
+RESULTADOS
+
+## Consejos para los datos
+
+- **Incluye frases fuera de tema** con `"answers": []` (más o menos 1 de cada 8). Sin ellas, el modelo ajustado llama a una función por cualquier cosa.
+- **Incluye negaciones e incompletas**: «no le mandés nada a Carlos», «bloqueá mi tarjeta» (sin decir cuál).
+- **La línea `reasoning`** dice de dónde sale cada argumento. Enseña al modelo a copiar valores de la frase en vez de inventarlos.
+- **Los argumentos solo llevan lo que el usuario dijo.** Si un dato opcional no aparece, no lo pongas.
+- **Cuántos ejemplos:** unos cientos mejoran qué función elige; para que acierte bien los argumentos hacen falta miles, con valores y frases variadas. Si elige bien la función pero se equivoca en los valores, faltan datos o son muy parecidos entre sí; también puedes probar `--lora-rank 32`.
+- **Cuántas épocas:** con pocos cientos de ejemplos, de 10 a 30. Mira la pérdida de validación al final de cada época: si sube mientras la de entrenamiento baja, el modelo está memorizando; detente ahí o agrega datos.
+- Para generar más frases con un modelo grande, `needle generate-data` usa OpenRouter (necesita `OPENROUTER_API_KEY`).
+
+## Limitaciones del entrenamiento local
+
+- **Sin nivel de confianza.** El entrenamiento local no ajusta la «cabeza» de confianza, así que el modelo ajustado responde `confidence: None`. Para decidir cuándo pedir confirmación, usa tus propias reglas (por ejemplo, confirmar siempre antes de mover dinero).
+- **4 bits en vez de 2.** El archivo ajustado pesa más que el original de 35 MB.
+- **El español usa más tokens.** Cactus mide 1.7 veces más que en inglés, lo que gasta más contexto.
+- La **plataforma de Cactus** (de pago, `needle platform finetune`, con `NEEDLE_API_KEY`) entrena el modelo completo con tus datos más los suyos, ajusta la confianza y devuelve el modelo a 2 bits.
+
+## Archivos
+
+| Archivo | Para qué |
+|---|---|
+| `herramientas.py` | Tus funciones. Escribe `tools.json`. |
+| `generar_datos.py` | Plantillas de frases → `datos/entrenamiento.jsonl` y `datos/prueba.jsonl`. |
+| `evaluar.py` | Mide aciertos por categoría y muestra errores. |
+| `entrenar.sh` | Todos los pasos seguidos. |
+| `resultados/` | Mediciones y registro del entrenamiento de este ejemplo. |
+
+Fuentes: [ficha de Needle 3](https://huggingface.co/Cactus-Compute/needle3), [guía de fine-tuning](https://cactuscompute.com/blog/finetuning-needle), [cómo diseñar herramientas](https://cactuscompute.com/blog/designing-tools-for-needle).

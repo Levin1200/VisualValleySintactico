@@ -1,0 +1,43 @@
+{
+  "modelo": "modelo base",
+  "correctas": 92,
+  "total": 200,
+  "categorias": {
+    "fuera": {
+      "correctas": 22,
+      "total": 25
+    },
+    "send_money": {
+      "correctas": 40,
+      "total": 70
+    },
+    "block_card": {
+      "correctas": 0,
+      "total": 6
+    },
+    "negada": {
+      "correctas": 6,
+      "total": 8
+    },
+    "pay_bill": {
+      "correctas": 5,
+      "total": 24
+    },
+    "buy_airtime": {
+      "correctas": 2,
+      "total": 33
+    },
+    "multiple": {
+      "correctas": 4,
+      "total": 19
+    },
+    "check_balance": {
+      "correctas": 9,
+      "total": 11
+    },
+    "incompleta": {
+      "correctas": 4,
+      "total": 4
+    }
+  }
+}

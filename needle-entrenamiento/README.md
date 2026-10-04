@@ -33,6 +33,7 @@ Reglas de Cactus que más importan:
 
 - **Una función por acción.** `pay_bill(service)` y `block_card(card)` funcionan mejor que una sola `hacer_operacion(tipo, valor)`.
 - **Cada argumento sale de lo que dijo el usuario.** Si un dato puede faltar, dale un valor por defecto (como la moneda, que por defecto es GTQ). Si es obligatorio y falta, el modelo no adivina: devuelve `[]` y tu app pregunta.
+- **Needle no completa los valores por defecto en su respuesta.** Si el usuario no dice la moneda, la llamada llega sin `currency`; Python pone `"GTQ"` al ejecutar la función. Además, `@needle.tool` (versión 3.1.0) no copia esos valores al esquema; `herramientas.py` lo hace por ti.
 - **Listas cerradas con `Literal`** y rangos con `Field(ge=..., le=...)`. El modelo no puede salirse de ellos.
 - **Cinco funciones o menos por turno.** Con más, Needle solo ve las cinco más parecidas a la frase.
 - Nombres y descripciones en inglés; los valores de las listas pueden estar en español (`"luz"`, `"agua"`).
@@ -74,6 +75,17 @@ needle build --lora modelos/adaptador.safetensors --out modelos/ajustado.cact
 ```
 
 O todo junto: `./entrenar.sh`.
+
+**Si entrenas solo con procesador (sin tarjeta gráfica)**, lo aprendimos probándolo en un servidor de 4 núcleos y 15 GB:
+
+- **Memoria:** con los valores por defecto (lotes de 16, secuencias de 1024) usó casi 14 GB y el sistema lo cerró. Con `--batch-size 8 --max-len 768` se quedó en ~7 GB. Antes de bajar `--max-len`, comprueba que tu ejemplo más largo quepa: con 5 funciones, los nuestros medían entre 518 y 689 tokens.
+- **Tiempo:** cada paso tardó ~55 segundos, así que 10 épocas (1020 pasos) habrían tomado unas 15 horas. Una sola época con `--lr 3e-4` (107 pasos) tomó ~1 h 40 min. En una GPU NVIDIA o una Mac con chip M es mucho más rápido.
+- **Usa `--val-split 0`.** Con validación, al terminar el paquete genera respuestas una por una para medir la precisión, y lo hace **antes** de guardar el adaptador. En procesador eso tardó más de 20 minutos. Mide después con `evaluar.py`, que es mucho más rápido.
+
+```sh
+needle finetune datos/entrenamiento.jsonl --epochs 1 --lr 3e-4 --batch-size 8 --max-len 768 \
+  --val-split 0 --out modelos/adaptador.safetensors
+```
 
 ### 5. Mide el modelo ajustado
 
